@@ -39,7 +39,7 @@
 #include <lib/mathlib/mathlib.h>
 #include <px4_posix.h>
 #include <geo/geo.h>
-#include <mavlink/mavlink_log.h>
+//#include <mavlink/mavlink_log.h>
 
 #include <time.h>
 #include <sys/time.h>
@@ -59,7 +59,7 @@
 
 //WE GENERATE DIFFERENT HEADERS TO DO THIS!
 //#include <v1.0/simulink/mavlink.h>
-#include <v1.0/FTAP/mavlink.h> 
+#include <v1.0/bronberg/mavlink.h>
  
 extern "C" __EXPORT int simulink_main(int argc, char *argv[]);
 
@@ -68,6 +68,7 @@ static bool thread_running = false;		/**< daemon status flag */
 static int daemon_task;	
 static orb_advert_t _gps_pub = nullptr;
 static orb_advert_t _sensors_pub = nullptr;
+static orb_advert_t _diff_pres_pub = nullptr;
 
 static int _act_sub = 0;
 static int _att_sub = 0;
@@ -76,7 +77,7 @@ static int _test_sub = 0;
 static int _rc_sub = 0;
 static int _sensors_sub = 0;
 static int _pos_sub = 0;
-static int _track_sub = 0;
+//static int _track_sub = 0;
 static int _manual_sub = 0;
 
 static int counter = 0;
@@ -160,7 +161,7 @@ void write_hil_controls(Autopilot_Interface &api)
 
 			// orb_copy(ORB_ID(actuator_controls_0), _act_sub, &_actuators);
 
-			orb_copy(ORB_ID(track_setpoint), _track_sub, &_track);
+			//orb_copy(ORB_ID(track_setpoint), _track_sub, &_track);
 			
 			orb_copy(ORB_ID(vehicle_local_position), _pos_sub, &_pos);
 
@@ -203,8 +204,8 @@ void write_hil_controls(Autopilot_Interface &api)
 			sim.probe_2 = _test_val.value2;
 			sim.probe_3 = _test_val.value3;
 			sim.probe_4 = _test_val.value4;
-			sim.probe_5 = _track.vr;
-			sim.probe_6 = _track.vx;
+			sim.probe_5 = 0;
+			sim.probe_6 = 0;
 			api.write_sim(sim);
 	 		usleep(100);
 		 } else {
@@ -220,49 +221,53 @@ void assign_sensors(mavlink_hil_sensor_t sensor_message, uint64_t timestamp)
 	struct sensor_combined_s hil_sensors;
 	memset(&hil_sensors, 0, sizeof(hil_sensors));
 
+	// Differential pressure data
+	struct differential_pressure_s _diff_pres;
+	memset(&_diff_pres, 0, sizeof(_diff_pres));
+
 	hil_sensors.timestamp = timestamp;
 
-	hil_sensors.gyro_raw[0] = sensor_message.xgyro * 1000.0f;
-	hil_sensors.gyro_raw[1] = sensor_message.ygyro * 1000.0f;
-	hil_sensors.gyro_raw[2] = sensor_message.zgyro * 1000.0f;
-	hil_sensors.gyro_rad_s[0] = sensor_message.xgyro;
-	hil_sensors.gyro_rad_s[1] = sensor_message.ygyro;
-	hil_sensors.gyro_rad_s[2] = sensor_message.zgyro;
-	hil_sensors.gyro_timestamp[0] = timestamp;
+//	hil_sensors.gyro_raw[0] = sensor_message.xgyro * 1000.0f;
+//	hil_sensors.gyro_raw[1] = sensor_message.ygyro * 1000.0f;
+//	hil_sensors.gyro_raw[2] = sensor_message.zgyro * 1000.0f;
+	hil_sensors.gyro_rad[0] = sensor_message.xgyro;
+	hil_sensors.gyro_rad[1] = sensor_message.ygyro;
+	hil_sensors.gyro_rad[2] = sensor_message.zgyro;
+//	hil_sensors.gyro_timestamp[0] = timestamp;
 
-	hil_sensors.accelerometer_raw[0] = sensor_message.xacc / mg2ms2;
-	hil_sensors.accelerometer_raw[1] = sensor_message.yacc / mg2ms2;
-	hil_sensors.accelerometer_raw[2] = sensor_message.zacc / mg2ms2;
+//	hil_sensors.accelerometer_raw[0] = sensor_message.xacc / mg2ms2;
+//	hil_sensors.accelerometer_raw[1] = sensor_message.yacc / mg2ms2;
+//	hil_sensors.accelerometer_raw[2] = sensor_message.zacc / mg2ms2;
 	hil_sensors.accelerometer_m_s2[0] = sensor_message.xacc;
 	hil_sensors.accelerometer_m_s2[1] = sensor_message.yacc;
 	hil_sensors.accelerometer_m_s2[2] = sensor_message.zacc;
-	hil_sensors.accelerometer_mode[0] = 0; // TODO what is this?
-	hil_sensors.accelerometer_range_m_s2[0] = 32.7f; // int16
-	hil_sensors.accelerometer_timestamp[0] = timestamp;
+//	hil_sensors.accelerometer_mode[0] = 0; // TODO what is this?
+//	hil_sensors.accelerometer_range_m_s2[0] = 32.7f; // int16
+//	hil_sensors.accelerometer_timestamp[0] = timestamp;
 
-	hil_sensors.adc_voltage_v[0] = 0.0f;
-	hil_sensors.adc_voltage_v[1] = 0.0f;
-	hil_sensors.adc_voltage_v[2] = 0.0f;
+//	hil_sensors.adc_voltage_v[0] = 0.0f;
+//	hil_sensors.adc_voltage_v[1] = 0.0f;
+//	hil_sensors.adc_voltage_v[2] = 0.0f;
 
-	hil_sensors.magnetometer_raw[0] = sensor_message.xmag * 1000.0f;
-	hil_sensors.magnetometer_raw[1] = sensor_message.ymag * 1000.0f;
-	hil_sensors.magnetometer_raw[2] = sensor_message.zmag * 1000.0f;
+//	hil_sensors.magnetometer_raw[0] = sensor_message.xmag * 1000.0f;
+//	hil_sensors.magnetometer_raw[1] = sensor_message.ymag * 1000.0f;
+//	hil_sensors.magnetometer_raw[2] = sensor_message.zmag * 1000.0f;
 	hil_sensors.magnetometer_ga[0] = sensor_message.xmag;
 	hil_sensors.magnetometer_ga[1] = sensor_message.ymag;
 	hil_sensors.magnetometer_ga[2] = sensor_message.zmag;
-	hil_sensors.magnetometer_range_ga[0] = 32.7f; // int16
-	hil_sensors.magnetometer_mode[0] = 0; // TODO what is this
-	hil_sensors.magnetometer_cuttoff_freq_hz[0] = 50.0f;
-	hil_sensors.magnetometer_timestamp[0] = timestamp;
+//	hil_sensors.magnetometer_range_ga[0] = 32.7f; // int16
+//	hil_sensors.magnetometer_mode[0] = 0; // TODO what is this
+//	hil_sensors.magnetometer_cuttoff_freq_hz[0] = 50.0f;
+//	hil_sensors.magnetometer_timestamp[0] = timestamp;
 
-	hil_sensors.baro_pres_mbar[0] = sensor_message.abs_pressure;
-	hil_sensors.baro_alt_meter[0] = sensor_message.pressure_alt;
-	hil_sensors.baro_temp_celcius[0] = sensor_message.temperature;
-	hil_sensors.baro_timestamp[0] = timestamp;
+//	hil_sensors.baro_pres_mbar[0] = sensor_message.abs_pressure;
+	hil_sensors.baro_alt_meter = sensor_message.pressure_alt;
+	hil_sensors.baro_temp_celcius = sensor_message.temperature;
+//	hil_sensors.baro_timestamp[0] = timestamp;
 
-	hil_sensors.differential_pressure_pa[0] = sensor_message.diff_pressure * 1e2f; //from hPa to Pa
+//	hil_sensors.differential_pressure_pa[0] = sensor_message.diff_pressure * 1e2f; //from hPa to Pa
 	//hil_sensors.differential_pressure_filtered_pa[0] = sensor_message.differential_pressure_pa[0];
-	hil_sensors.differential_pressure_timestamp[0] = timestamp;
+//	hil_sensors.differential_pressure_timestamp[0] = timestamp;
 
 	/* publish combined sensor topic */
 	if (_sensors_pub == nullptr) {
@@ -271,6 +276,12 @@ void assign_sensors(mavlink_hil_sensor_t sensor_message, uint64_t timestamp)
 	} else {
 		orb_publish(ORB_ID(sensor_combined), _sensors_pub, &hil_sensors);
 	}
+
+	// Do the differential pressure publishing
+	_diff_pres.differential_pressure_raw_pa = sensor_message.diff_pressure * 1e2f;
+	_diff_pres.differential_pressure_filtered_pa = _diff_pres.differential_pressure_raw_pa;
+	_diff_pres.temperature = hil_sensors.baro_temp_celcius;
+
 }
 
 void assign_gps(mavlink_hil_gps_t gps_message, uint64_t timestamp) 
@@ -278,20 +289,20 @@ void assign_gps(mavlink_hil_gps_t gps_message, uint64_t timestamp)
 	struct vehicle_gps_position_s hil_gps;
 	memset(&hil_gps, 0, sizeof(hil_gps));
 
-	hil_gps.timestamp_time = timestamp;
+	//hil_gps.timestamp_time = timestamp;
 	hil_gps.time_utc_usec = gps_message.time_usec;
 
-	hil_gps.timestamp_position = timestamp;
+	//hil_gps.timestamp_position = timestamp;
 	hil_gps.lat = gps_message.lat;
 	hil_gps.lon = gps_message.lon;
 	hil_gps.alt = gps_message.alt;
 	hil_gps.eph = (float)gps_message.eph * 1e-2f; // from cm to m
 	hil_gps.epv = (float)gps_message.epv * 1e-2f; // from cm to m
 
-	hil_gps.timestamp_variance = timestamp;
+	//hil_gps.timestamp_variance = timestamp;
 	hil_gps.s_variance_m_s = 5.0f;
 
-	hil_gps.timestamp_velocity = timestamp;
+	//hil_gps.timestamp_velocity = timestamp;
 	hil_gps.vel_m_s = (float)gps_message.vel * 1e-2f; // from cm/s to m/s
 	hil_gps.vel_n_m_s = gps_message.vn * 1e-2f; // from cm to m
 	hil_gps.vel_e_m_s = gps_message.ve * 1e-2f; // from cm to m

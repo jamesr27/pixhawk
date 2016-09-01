@@ -1,5 +1,5 @@
 
-uint64 timestamp				# in microseconds since system start, is set whenever the writing thread stores new data
+#uint64 timestamp				# in microseconds since system start, is set whenever the writing thread stores new data
 
 
 float32 u

@@ -29,7 +29,7 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <v1.0/simulink/mavlink.h>
+#include <v1.0/bronberg/mavlink.h>
 
 // ------------------------------------------------------------------------------
 //   Defines

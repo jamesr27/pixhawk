@@ -34,7 +34,7 @@
 #include <nuttx/serial/serial.h>
 #include <nuttx/config.h>
  
-#include <v1.0/simulink/mavlink.h>
+#include <v1.0/bronberg/mavlink.h>
 
 // ------------------------------------------------------------------------------
 //   Defines
