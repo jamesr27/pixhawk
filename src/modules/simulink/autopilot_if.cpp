@@ -226,7 +226,7 @@ write_controls()
 	int len = write_message(message);
 
 	// check the write
-	if ( not len > 0 )
+	if (len == 0 )
 		fprintf(stderr,"WARNING: could not send HIL_CONTROLS \n");
 
 	return;
@@ -250,7 +250,7 @@ write_sim(mavlink_simulink_t sim)
 	int len = write_message(message);
 
 	// check the write
-	if ( not len > 0 )
+	if (len == 0 )
 		fprintf(stderr,"WARNING: could not send SIMULINK \n");
 
 	return;
@@ -269,7 +269,7 @@ start()
 	//   CHECK SERIAL PORT
 	// --------------------------------------------------------------------------
 
-	if ( not serial_port->status == 1 ) // SERIAL_PORT_OPEN
+	if (serial_port->status == 0 ) // SERIAL_PORT_OPEN
 	{
 		fprintf(stderr,"ERROR: serial port not open\n");
 		exit(1);

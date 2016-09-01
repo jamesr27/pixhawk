@@ -51,8 +51,9 @@
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/test_values.h>
-#include <uORB/topics/track_setpoint.h>
+//#include <uORB/topics/track_setpoint.h>
 #include <uORB/topics/manual_control_setpoint.h>
+#include <uORB/topics/differential_pressure.h>
 
 #include "my_serial.h"
 #include "autopilot_if.h"
@@ -133,14 +134,14 @@ void write_hil_controls(Autopilot_Interface &api)
 	struct sensor_combined_s _hil_sensors;
 	memset(&_hil_sensors, 0, sizeof(_hil_sensors));
 
-	struct actuator_controls_0_s _actuators;
-	memset(&_actuators, 0, sizeof(_actuators));
+	//struct actuator_controls_0_s _actuators;
+	//memset(&_actuators, 0, sizeof(_actuators));
 
 	struct vehicle_local_position_s _pos;
 	memset(&_pos, 0, sizeof(_pos));
 
-	struct track_setpoint_s _track;
-	memset(&_track, 0, sizeof(_track));
+//	struct track_setpoint_s _track;
+//	memset(&_track, 0, sizeof(_track));
 
 	struct manual_control_setpoint_s _manual;
 	memset(&_manual, 0, sizeof(_manual));
@@ -281,6 +282,12 @@ void assign_sensors(mavlink_hil_sensor_t sensor_message, uint64_t timestamp)
 	_diff_pres.differential_pressure_raw_pa = sensor_message.diff_pressure * 1e2f;
 	_diff_pres.differential_pressure_filtered_pa = _diff_pres.differential_pressure_raw_pa;
 	_diff_pres.temperature = hil_sensors.baro_temp_celcius;
+
+	if(_diff_pres_pub != nullptr) {
+		orb_publish(ORB_ID(differential_pressure), _diff_pres_pub, &_diff_pres);
+	} else {
+		_diff_pres_pub = orb_advertise(ORB_ID(differential_pressure), &_diff_pres);
+	}
 
 }
 
@@ -467,7 +474,7 @@ simulink_main(int argc, char *argv[])
 int 
 simulink_thread_main(int argc, char *argv[]){
 
-	_mavlink_fd = px4_open(MAVLINK_LOG_DEVICE, 0);
+	_mavlink_fd = px4_open("dev/mavlink", 0);
 	char *uart_name = (char*)"/dev/ttyACM0"; //USB
 	//char *uart_name = (char*)"/dev/ttyS1"; //Defaults to the radio on Telem 1.
 	
@@ -492,7 +499,7 @@ simulink_thread_main(int argc, char *argv[]){
 	_test_sub=  orb_subscribe(ORB_ID(test_values));
 	_sensors_sub = orb_subscribe(ORB_ID(sensor_combined));
 	_pos_sub  = orb_subscribe(ORB_ID(vehicle_local_position));
-	_track_sub = orb_subscribe(ORB_ID(track_setpoint));
+//	_track_sub = orb_subscribe(ORB_ID(track_setpoint));
 	_manual_sub = orb_subscribe(ORB_ID(manual_control_setpoint));
 	write_hil_controls(autopilot_interface);
 
