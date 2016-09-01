@@ -5,6 +5,11 @@ set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchains/Toolchain-arm-none
 set(config_uavcan_num_ifaces 2)
 
 set(config_module_list
+
+    # James' adds
+    modules/simulink
+
+
 	#
 	# Board support modules
 	#
