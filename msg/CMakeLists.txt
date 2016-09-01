@@ -44,6 +44,7 @@ set(msg_file_names
 	commander_state.msg
 	control_state.msg
 	cpuload.msg
+	custom_attitude_setpoint.msg
 	debug_key_value.msg
 	differential_pressure.msg
 	distance_sensor.msg
@@ -96,6 +97,7 @@ set(msg_file_names
 	tecs_status.msg
 	telemetry_status.msg
 	test_motor.msg
+	test_values.msg
 	time_offset.msg
 	transponder_report.msg
 	uavcan_parameter_request.msg

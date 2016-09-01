@@ -496,7 +496,7 @@ simulink_thread_main(int argc, char *argv[]){
 	_rc_sub = orb_subscribe(ORB_ID(rc_channels));
 	_att_sub = orb_subscribe(ORB_ID(custom_attitude_setpoint));	
 	_v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
-	_test_sub=  orb_subscribe(ORB_ID(test_values));
+	_test_sub =  orb_subscribe(ORB_ID(test_values));
 	_sensors_sub = orb_subscribe(ORB_ID(sensor_combined));
 	_pos_sub  = orb_subscribe(ORB_ID(vehicle_local_position));
 //	_track_sub = orb_subscribe(ORB_ID(track_setpoint));
