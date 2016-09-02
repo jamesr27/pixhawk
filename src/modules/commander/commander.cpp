@@ -575,6 +575,7 @@ void print_status()
 	orb_copy(ORB_ID(vehicle_status), state_sub, &state);
 
 	const char *armed_str;
+	const char *hil_str;
 
 	switch (status.arming_state) {
 	case vehicle_status_s::ARMING_STATE_INIT:
@@ -610,9 +611,23 @@ void print_status()
 		break;
 	}
 
+	switch (state.hil_state){
+	case vehicle_status_s::HIL_STATE_ON:
+		hil_str = "ON";
+		break;
+
+	case vehicle_status_s::HIL_STATE_OFF:
+		hil_str = "OFF";
+		break;
+	default:
+		hil_str = "I DONT KNOW WHAT I'M DOING";
+		break;
+
+	}
+
 	px4_close(state_sub);
 
-
+	warnx("hil_state: %s",hil_str);
 	warnx("arming: %s", armed_str);
 }
 
@@ -1174,8 +1189,10 @@ int commander_thread_main(int argc, char *argv[])
 	argv += 1;
 #endif
 
+	// James: There was some cock up in argument numbering here.
 	if (argc > 2) {
-		if (!strcmp(argv[2],"-hil")) {
+//		if (!strcmp(argv[2],"-hil")) {
+		if (!strcmp(argv[3],"-hil")) {
 			startup_in_hil = true;
 		} else {
 			PX4_ERR("Argument %s not supported, abort.", argv[2]);
