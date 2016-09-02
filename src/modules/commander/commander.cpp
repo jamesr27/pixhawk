@@ -1189,10 +1189,9 @@ int commander_thread_main(int argc, char *argv[])
 	argv += 1;
 #endif
 
-	// James: There was some cock up in argument numbering here.
+	// James: There was some cock up in argument numbering here. But they fixed it with the +=1 above.
 	if (argc > 2) {
-//		if (!strcmp(argv[2],"-hil")) {
-		if (!strcmp(argv[3],"-hil")) {
+		if (!strcmp(argv[2],"-hil")) {
 			startup_in_hil = true;
 		} else {
 			PX4_ERR("Argument %s not supported, abort.", argv[2]);
