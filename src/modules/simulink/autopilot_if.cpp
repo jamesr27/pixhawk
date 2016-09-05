@@ -10,7 +10,7 @@
  *
  * @brief Autopilot interface functions
  *
- * Functions for sending and recieving commands to an autopilot via MAVlink
+ * Functions for sending and receiving commands to an autopilot via MAVlink
  *
  */
 
@@ -155,7 +155,7 @@ read_messages()
 
 				case MAVLINK_MSG_ID_HIL_SENSOR:
 				{
-				//	printf("MAVLINK_MSG_ID_HIL_SENSOR\n");
+					//printf("MAVLINK_MSG_ID_HIL_SENSOR\n");
 					mavlink_msg_hil_sensor_decode(&message, &(current_messages.hil_sensor));
 					current_messages.time_stamps.hil_sensor = get_time_usec();
 					this_timestamps.hil_sensor = current_messages.time_stamps.hil_sensor;
@@ -166,7 +166,7 @@ read_messages()
 
 				case MAVLINK_MSG_ID_HEARTBEAT:
 				{
-				//	printf("MAVLINK_MSG_ID_HEARTBEAT %d\n", mavlink_msg_heartbeat_get_mavlink_version(&message));
+					//printf("MAVLINK_MSG_ID_HEARTBEAT %d\n", mavlink_msg_heartbeat_get_mavlink_version(&message));
 					break;
 				}
 

@@ -71,7 +71,7 @@ static orb_advert_t _gps_pub = nullptr;
 static orb_advert_t _sensors_pub = nullptr;
 static orb_advert_t _diff_pres_pub = nullptr;
 
-static int _act_sub = 0;
+//static int _act_sub = 0;
 static int _att_sub = 0;
 static int _v_att_sub = 0;
 static int _test_sub = 0;
@@ -172,18 +172,23 @@ void write_hil_controls(Autopilot_Interface &api)
 
 			counter++;
 
+			// James checks: See if we get data out of the orbs
+			//printf("simwrite: %0.3f %0.3f %0.3f\n",(double)_pos.x,(double)_pos.y,(double)_pos.z);
+
+
+
 
 			mavlink_simulink_t sim;
 			sim.time_usec = hrt_absolute_time();
 			sim.counter = counter;
-			//sim.stick_input0 =  _rc_chan.channels[0];
-			//sim.stick_input1 = _rc_chan.channels[1];
-			//sim.stick_input2 = _rc_chan.channels[2];
-			//sim.stick_input3 = _rc_chan.channels[3];
-			sim.stick_input0 =  _manual.y;
-			sim.stick_input1 = _manual.x;
-			sim.stick_input2 = _manual.r;
-			sim.stick_input3 = _manual.z;
+			sim.stick_input0 =  _rc_chan.channels[0];
+			sim.stick_input1 = _rc_chan.channels[1];
+			sim.stick_input2 = _rc_chan.channels[2];
+			sim.stick_input3 = _rc_chan.channels[3];
+//			sim.stick_input0 =  _manual.y;
+//			sim.stick_input1 = _manual.x;
+//			sim.stick_input2 = _manual.r;
+//			sim.stick_input3 = _manual.z;
 		
 			sim.stick_input4 = _rc_chan.channels[6];
 			sim.pos_x = _pos.x;
@@ -245,6 +250,9 @@ void assign_sensors(mavlink_hil_sensor_t sensor_message, uint64_t timestamp)
 //	hil_sensors.accelerometer_mode[0] = 0; // TODO what is this?
 //	hil_sensors.accelerometer_range_m_s2[0] = 32.7f; // int16
 //	hil_sensors.accelerometer_timestamp[0] = timestamp;
+
+	// James prints
+	//printf("Accels: %0.3f %0.3f %0.3f\n",(double)sensor_message.xacc,(double)sensor_message.yacc,(double)sensor_message.zacc);
 
 //	hil_sensors.adc_voltage_v[0] = 0.0f;
 //	hil_sensors.adc_voltage_v[1] = 0.0f;
@@ -492,9 +500,9 @@ simulink_thread_main(int argc, char *argv[]){
 	serial_port.start();
 	autopilot_interface.start();
 	
-	_act_sub = orb_subscribe(ORB_ID(actuator_controls_0));
+//	_act_sub = orb_subscribe(ORB_ID(actuator_controls_0));
 	_rc_sub = orb_subscribe(ORB_ID(rc_channels));
-	_att_sub = orb_subscribe(ORB_ID(custom_attitude_setpoint));	
+	_att_sub = orb_subscribe(ORB_ID(custom_attitude_setpoint));
 	_v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
 	_test_sub =  orb_subscribe(ORB_ID(test_values));
 	_sensors_sub = orb_subscribe(ORB_ID(sensor_combined));

@@ -8,6 +8,7 @@ set(config_module_list
 
     # James' adds
     modules/simulink
+    modules/data_tester
 
 
 	#
