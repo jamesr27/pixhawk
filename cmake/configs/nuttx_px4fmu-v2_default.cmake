@@ -6,6 +6,8 @@ set(config_uavcan_num_ifaces 2)
 
 set(config_module_list
 
+    # I take out all estimators not in use to give us more space.
+    # with ekf2 and orignal ekf we run out of space on the pixhawk
     # James' adds
     modules/simulink
     modules/data_tester
@@ -102,20 +104,20 @@ set(config_module_list
 	#
 	# Estimation modules (EKF/ SO3 / other filters)
 	#
-	modules/attitude_estimator_q
-	#modules/ekf_att_pos_estimator
-	modules/position_estimator_inav
-	modules/local_position_estimator
-	modules/ekf2
+	#modules/attitude_estimator_q
+	modules/ekf_att_pos_estimator
+	#modules/position_estimator_inav
+	#modules/local_position_estimator
+	#modules/ekf2
 
 	#
 	# Vehicle Control
 	#
 	modules/fw_pos_control_l1
 	modules/fw_att_control
-	modules/mc_att_control
-	modules/mc_pos_control
-	modules/vtol_att_control
+	#modules/mc_att_control
+	#modules/mc_pos_control
+	#modules/vtol_att_control
 
 	#
 	# Logging

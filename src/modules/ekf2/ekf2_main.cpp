@@ -38,6 +38,9 @@
  * @author Roman Bapst
  */
 
+
+// James hacks this to work with our hil.
+
 #include <px4_config.h>
 #include <px4_defines.h>
 #include <px4_tasks.h>
@@ -276,6 +279,7 @@ private:
 
 	int update_subscriptions();
 
+	int counter = 0;
 };
 
 Ekf2::Ekf2():
@@ -421,6 +425,8 @@ void Ekf2::task_main()
 	vehicle_status_s _vehicle_status = {};
 
 	while (!_task_should_exit) {
+		// James
+		//printf("In main loop %d\n",counter);
 		int ret = px4_poll(fds, sizeof(fds) / sizeof(fds[0]), 1000);
 
 		if (ret < 0) {
@@ -458,6 +464,9 @@ void Ekf2::task_main()
 		orb_copy(ORB_ID(sensor_combined), _sensors_sub, &sensors);
 		// update all other topics if they have new data
 
+		//James
+		//printf("Sensors: %0.3f %0.3f %0.3f\n",(double)sensors.accelerometer_m_s2[2],(double)sensors.accelerometer_integral_dt,(double)sensors.baro_alt_meter);
+
 		orb_check(_status_sub, &vehicle_status_updated);
 
 		if (vehicle_status_updated) {
@@ -469,12 +478,18 @@ void Ekf2::task_main()
 		if (gps_updated) {
 			orb_copy(ORB_ID(vehicle_gps_position), _gps_sub, &gps);
 		}
+		//James
+		//printf("GPS: %0.3f %0.3f %0.3f\n",(double)gps.lat,(double)gps.timestamp_time_relative,(double)gps.timestamp);
+
 
 		orb_check(_airspeed_sub, &airspeed_updated);
 
 		if (airspeed_updated) {
 			orb_copy(ORB_ID(airspeed), _airspeed_sub, &airspeed);
 		}
+
+		//James
+		//printf("as: %0.3f %0.3f\n",(double)airspeed.true_airspeed_m_s,(double)airspeed.confidence);
 
 		orb_check(_optical_flow_sub, &optical_flow_updated);
 
@@ -519,6 +534,11 @@ void Ekf2::task_main()
 		_ekf.setIMUData(now, sensors.gyro_integral_dt * 1.e6f, sensors.accelerometer_integral_dt * 1.e6f,
 				gyro_integral, accel_integral);
 
+
+		//James
+		//printf("integral: %0.3f\n",(double)accel_integral[2]);
+
+
 		// read mag data
 		if (sensors.magnetometer_timestamp_relative == sensor_combined_s::RELATIVE_TIMESTAMP_INVALID) {
 			_ekf.setMagData(0, sensors.magnetometer_ga);
@@ -535,6 +555,9 @@ void Ekf2::task_main()
 
 		// read gps data if available
 		if (gps_updated) {
+			//James
+			//printf("in gps. %0.3f\n",(double)gps.timestamp);
+
 			struct gps_message gps_msg = {};
 			gps_msg.time_usec = gps.timestamp;
 			gps_msg.lat = gps.lat;
@@ -560,7 +583,10 @@ void Ekf2::task_main()
 		bool fuse_airspeed = airspeed_updated && !_vehicle_status.is_rotary_wing
 				     && _arspFusionThreshold.get() <= airspeed.true_airspeed_m_s && _arspFusionThreshold.get() >= 0.1f;
 
-		if (fuse_airspeed) {
+
+		if (fuse_airspeed || true) {
+			//James
+			//printf("In set airspeed %0.3f\n",(double)airspeed.true_airspeed_m_s);
 			float eas2tas = airspeed.true_airspeed_m_s / airspeed.indicated_airspeed_m_s;
 			_ekf.setAirspeedData(airspeed.timestamp, &airspeed.true_airspeed_m_s, &eas2tas);
 		}
@@ -622,8 +648,16 @@ void Ekf2::task_main()
 			_ekf.set_in_air_status(!vehicle_land_detected.landed);
 		}
 
+//		//James
+//		if(!_ekf.update()){
+//			printf("Not ekf update\n");
+//		}
+
+
 		// run the EKF update and output
 		if (_ekf.update()) {
+			//James
+			//printf("In ekf update\n");
 			// generate vehicle attitude quaternion data
 			struct vehicle_attitude_s att = {};
 			_ekf.copy_quaternion(att.q);
@@ -642,6 +676,8 @@ void Ekf2::task_main()
 			ctrl_state.pitch_rate = _lp_pitch_rate.apply(gyro_rad[1]);
 			ctrl_state.yaw_rate = _lp_yaw_rate.apply(gyro_rad[2]);
 
+			//printf("gyrorad %0.3f %0.3f %0.3f %0.3f\n",(double)sensors.gyro_rad[0],(double)sensors.gyro_rad[1],(double)sensors.gyro_rad[2],(double)gyro_bias[0]);
+
 			// Velocity in body frame
 			float velocity[3];
 			_ekf.get_velocity(velocity);
@@ -651,6 +687,9 @@ void Ekf2::task_main()
 			ctrl_state.x_vel = v_b(0);
 			ctrl_state.y_vel = v_b(1);
 			ctrl_state.z_vel = v_b(2);
+
+			//printf("vel %0.3f %0.3f %0.3f\n",(double)v_b(0),(double)v_b(1),(double)v_b(2));
+
 
 
 			// Local Position NED
@@ -693,6 +732,7 @@ void Ekf2::task_main()
 				    && airspeed.timestamp > 0) {
 					ctrl_state.airspeed = airspeed.indicated_airspeed_m_s;
 					ctrl_state.airspeed_valid = true;
+					printf("using ind airspeed\n");
 				}
 
 			} else if (_airspeed_mode.get() == control_state_s::AIRSPD_MODE_EST) {
@@ -1009,6 +1049,7 @@ void Ekf2::task_main()
 				orb_publish(ORB_ID(ekf2_replay), _replay_pub, &replay);
 			}
 		}
+		counter++;
 	}
 
 	delete ekf2::instance;

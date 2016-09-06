@@ -80,6 +80,7 @@ static int _sensors_sub = 0;
 static int _pos_sub = 0;
 //static int _track_sub = 0;
 static int _manual_sub = 0;
+static int _diff_pres_sub = 0;
 
 static int counter = 0;
 static uint64_t previous_timestamp;
@@ -87,6 +88,8 @@ static uint64_t previous_timestamp;
 static int _mavlink_fd = 0;
 
 static const float mg2ms2 = CONSTANTS_ONE_G / 1000.0f;
+
+float lastTimeStamp = 0.0;
 
 /** <Extract mavlink information and write it to the appropriate orbs. */ 
 
@@ -239,6 +242,7 @@ void assign_sensors(mavlink_hil_sensor_t sensor_message, uint64_t timestamp)
 	hil_sensors.gyro_rad[0] = sensor_message.xgyro;
 	hil_sensors.gyro_rad[1] = sensor_message.ygyro;
 	hil_sensors.gyro_rad[2] = sensor_message.zgyro;
+	hil_sensors.gyro_integral_dt = float(timestamp/1.e6) - lastTimeStamp;
 //	hil_sensors.gyro_timestamp[0] = timestamp;
 
 //	hil_sensors.accelerometer_raw[0] = sensor_message.xacc / mg2ms2;
@@ -247,6 +251,9 @@ void assign_sensors(mavlink_hil_sensor_t sensor_message, uint64_t timestamp)
 	hil_sensors.accelerometer_m_s2[0] = sensor_message.xacc;
 	hil_sensors.accelerometer_m_s2[1] = sensor_message.yacc;
 	hil_sensors.accelerometer_m_s2[2] = sensor_message.zacc;
+	hil_sensors.accelerometer_integral_dt = (float)(timestamp/1.e6) - lastTimeStamp;
+	hil_sensors.accelerometer_timestamp_relative = (int32_t)timestamp;
+
 //	hil_sensors.accelerometer_mode[0] = 0; // TODO what is this?
 //	hil_sensors.accelerometer_range_m_s2[0] = 32.7f; // int16
 //	hil_sensors.accelerometer_timestamp[0] = timestamp;
@@ -268,10 +275,12 @@ void assign_sensors(mavlink_hil_sensor_t sensor_message, uint64_t timestamp)
 //	hil_sensors.magnetometer_mode[0] = 0; // TODO what is this
 //	hil_sensors.magnetometer_cuttoff_freq_hz[0] = 50.0f;
 //	hil_sensors.magnetometer_timestamp[0] = timestamp;
+	hil_sensors.magnetometer_timestamp_relative = (int32_t)0;
 
 //	hil_sensors.baro_pres_mbar[0] = sensor_message.abs_pressure;
 	hil_sensors.baro_alt_meter = sensor_message.pressure_alt;
 	hil_sensors.baro_temp_celcius = sensor_message.temperature;
+	hil_sensors.baro_timestamp_relative = (int32_t)0;
 //	hil_sensors.baro_timestamp[0] = timestamp;
 
 //	hil_sensors.differential_pressure_pa[0] = sensor_message.diff_pressure * 1e2f; //from hPa to Pa
@@ -290,12 +299,15 @@ void assign_sensors(mavlink_hil_sensor_t sensor_message, uint64_t timestamp)
 	_diff_pres.differential_pressure_raw_pa = sensor_message.diff_pressure * 1e2f;
 	_diff_pres.differential_pressure_filtered_pa = _diff_pres.differential_pressure_raw_pa;
 	_diff_pres.temperature = hil_sensors.baro_temp_celcius;
+	_diff_pres.timestamp = timestamp;
 
 	if(_diff_pres_pub != nullptr) {
 		orb_publish(ORB_ID(differential_pressure), _diff_pres_pub, &_diff_pres);
 	} else {
 		_diff_pres_pub = orb_advertise(ORB_ID(differential_pressure), &_diff_pres);
 	}
+
+	lastTimeStamp = (float) timestamp / 1.0e6f;
 
 }
 
@@ -304,8 +316,9 @@ void assign_gps(mavlink_hil_gps_t gps_message, uint64_t timestamp)
 	struct vehicle_gps_position_s hil_gps;
 	memset(&hil_gps, 0, sizeof(hil_gps));
 
-	//hil_gps.timestamp_time = timestamp;
+	hil_gps.timestamp = timestamp;
 	hil_gps.time_utc_usec = gps_message.time_usec;
+	hil_gps.timestamp_time_relative = (int32_t)0;
 
 	//hil_gps.timestamp_position = timestamp;
 	hil_gps.lat = gps_message.lat;
@@ -509,6 +522,7 @@ simulink_thread_main(int argc, char *argv[]){
 	_pos_sub  = orb_subscribe(ORB_ID(vehicle_local_position));
 //	_track_sub = orb_subscribe(ORB_ID(track_setpoint));
 	_manual_sub = orb_subscribe(ORB_ID(manual_control_setpoint));
+	_diff_pres_sub = orb_subscribe(ORB_ID(differential_pressure));
 	write_hil_controls(autopilot_interface);
 
 	autopilot_interface.stop();

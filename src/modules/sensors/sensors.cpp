@@ -1318,6 +1318,10 @@ Sensors::diff_pres_poll(struct sensor_combined_s &raw)
 		_airspeed.confidence = _airspeed_validator.confidence(hrt_absolute_time());
 #endif
 
+		//James
+		_airspeed.confidence = 1.0f;
+
+
 		/* don't risk to feed negative airspeed into the system */
 		_airspeed.indicated_airspeed_m_s = math::max(0.0f,
 						   calc_indicated_airspeed(_diff_pres.differential_pressure_filtered_pa));
