@@ -598,10 +598,13 @@ void AttitudePositionEstimatorEKF::task_main()
 		/* only run estimator if gyro updated */
 		if (fds[1].revents & POLLIN) {
 
+
+
 			/* check vehicle status for changes to publication state */
 			bool prev_hil = (_vehicle_status.hil_state == vehicle_status_s::HIL_STATE_ON);
 			vehicle_status_poll();
 			vehicle_land_detected_poll();
+
 
 			perf_count(_perf_gyro);
 
@@ -609,6 +612,7 @@ void AttitudePositionEstimatorEKF::task_main()
 			if (!prev_hil && (_vehicle_status.hil_state == vehicle_status_s::HIL_STATE_ON)) {
 				/* system is in HIL now, wait for measurements to come in one last round */
 				usleep(60000);
+
 
 				/* now read all sensor publications to ensure all real sensor data is purged */
 				orb_copy(ORB_ID(sensor_combined), _sensor_combined_sub, &_sensor_combined);
@@ -656,6 +660,7 @@ void AttitudePositionEstimatorEKF::task_main()
 
 				if (_gpsIsGood) {
 					_baro_gps_offset = _baro_alt_filt - _gps_alt_filt;
+					//printf("gps good\n");
 				}
 
 //				if (hrt_elapsed_time(&_last_debug_print) >= 5e6) {
@@ -907,7 +912,7 @@ void AttitudePositionEstimatorEKF::publishControlState()
 	// use estimated velocity for airspeed estimate
 	if (_parameters.airspeed_mode == control_state_s::AIRSPD_MODE_MEAS) {
 		// use measured airspeed
-		if (PX4_ISFINITE(_airspeed.indicated_airspeed_m_s) && hrt_absolute_time() - _airspeed.timestamp < 1e6
+		if (PX4_ISFINITE(_airspeed.indicated_airspeed_m_s)//James hacks this out for hil... && hrt_absolute_time() - _airspeed.timestamp < 1e6
 		    && _airspeed.timestamp > 0) {
 			_ctrl_state.airspeed = _airspeed.indicated_airspeed_m_s;
 			_ctrl_state.airspeed_valid = true;
@@ -998,6 +1003,7 @@ void AttitudePositionEstimatorEKF::publishLocalPosition()
 
 void AttitudePositionEstimatorEKF::publishGlobalPosition()
 {
+
 	_global_pos.timestamp = _local_pos.timestamp;
 
 	if (_local_pos.xy_global) {
@@ -1071,6 +1077,8 @@ void AttitudePositionEstimatorEKF::publishGlobalPosition()
 		return;
 	}
 
+
+	//printf("pubGlobal: %0.2f %0.2f %d %0.2f %0.2f\n",(double)_global_pos.lat,(double)_global_pos.lon,_local_pos.v_xy_valid,(double)hrt_absolute_time(),(double)_previousGPSTimestamp);
 	/* lazily publish the global position only once available */
 	if (_global_pos_pub != nullptr) {
 		/* publish the global position */
@@ -1078,6 +1086,7 @@ void AttitudePositionEstimatorEKF::publishGlobalPosition()
 
 	} else {
 		/* advertise and publish */
+	//	printf("actually publish it");
 		_global_pos_pub = orb_advertise(ORB_ID(vehicle_global_position), &_global_pos);
 	}
 }
@@ -1491,6 +1500,8 @@ void AttitudePositionEstimatorEKF::pollData()
 			_ekf->gpsLat = math::radians(_gps.lat / (double)1e7);
 			_ekf->gpsLon = math::radians(_gps.lon / (double)1e7) - M_PI;
 			_ekf->gpsHgt = _gps.alt / 1e3f;
+
+			//printf("gps: %d %0.3f %0.3f %0.3f %0.3f %0.3f\n",_gps.fix_type,(double)_gps.vel_n_m_s,(double)_gps.vel_e_m_s,(double)_gps.vel_d_m_s,(double)_ekf->gpsLat,(double)_ekf->gpsLon);
 
 			if (_previousGPSTimestamp != 0) {
 				//Calculate average time between GPS updates

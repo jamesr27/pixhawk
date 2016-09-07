@@ -109,7 +109,7 @@ data_tester_thread_main(int argc, char *argv[]){
 		printf("GPS: lat %0.3f lon %0.3f alt %0.3f\n",(double)_hil_gps.lat,(double)_hil_gps.lon,(double)_hil_gps.alt);
 		printf("Control State: as %0.3f xa %0.3f zp %0.3f\n",(double)_control_state.airspeed,(double)_control_state.x_acc,(double)_control_state.z_pos);
 		//printf("dpress: %0.3f %0.3f %0.3f\n",(double)_differential_pressure.differential_pressure_filtered_pa,(double)_differential_pressure.differential_pressure_raw_pa,(double)_differential_pressure.temperature);
-		printf("airspeed: %0.3f %0.3f %0.3f\n",(double)_airspeed.true_airspeed_m_s,(double)_airspeed.true_airspeed_unfiltered_m_s,(double)_airspeed.indicated_airspeed_m_s);
+		printf("airspeed: %0.3f %0.3f %0.3f %0.3f\n",(double)_airspeed.true_airspeed_m_s,(double)_airspeed.true_airspeed_unfiltered_m_s,(double)_airspeed.indicated_airspeed_m_s,(double)_airspeed.timestamp);
 
 		usleep(500000);
 	}

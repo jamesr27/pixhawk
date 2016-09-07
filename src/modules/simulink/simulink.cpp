@@ -225,6 +225,8 @@ void write_hil_controls(Autopilot_Interface &api)
 
 void assign_sensors(mavlink_hil_sensor_t sensor_message, uint64_t timestamp) 
 {
+	// James hack
+	timestamp = hrt_absolute_time();
 	//mavlink_log_info(_mavlink_fd, "We're in here\n");
 	/* sensor combined */
 	struct sensor_combined_s hil_sensors;
@@ -252,7 +254,7 @@ void assign_sensors(mavlink_hil_sensor_t sensor_message, uint64_t timestamp)
 	hil_sensors.accelerometer_m_s2[1] = sensor_message.yacc;
 	hil_sensors.accelerometer_m_s2[2] = sensor_message.zacc;
 	hil_sensors.accelerometer_integral_dt = (float)(timestamp/1.e6) - lastTimeStamp;
-	hil_sensors.accelerometer_timestamp_relative = (int32_t)timestamp;
+	hil_sensors.accelerometer_timestamp_relative = (int32_t)0;
 
 //	hil_sensors.accelerometer_mode[0] = 0; // TODO what is this?
 //	hil_sensors.accelerometer_range_m_s2[0] = 32.7f; // int16
@@ -313,6 +315,8 @@ void assign_sensors(mavlink_hil_sensor_t sensor_message, uint64_t timestamp)
 
 void assign_gps(mavlink_hil_gps_t gps_message, uint64_t timestamp) 
 {
+	// James hack
+	timestamp = hrt_absolute_time();
 	struct vehicle_gps_position_s hil_gps;
 	memset(&hil_gps, 0, sizeof(hil_gps));
 
