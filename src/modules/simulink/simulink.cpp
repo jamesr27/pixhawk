@@ -54,6 +54,7 @@
 //#include <uORB/topics/track_setpoint.h>
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/differential_pressure.h>
+#include <uORB/topics/actuator_controls.h>
 
 #include "my_serial.h"
 #include "autopilot_if.h"
@@ -81,6 +82,7 @@ static int _pos_sub = 0;
 //static int _track_sub = 0;
 static int _manual_sub = 0;
 static int _diff_pres_sub = 0;
+static int _act_sub = 0;
 
 static int counter = 0;
 static uint64_t previous_timestamp;
@@ -137,8 +139,8 @@ void write_hil_controls(Autopilot_Interface &api)
 	struct sensor_combined_s _hil_sensors;
 	memset(&_hil_sensors, 0, sizeof(_hil_sensors));
 
-	//struct actuator_controls_0_s _actuators;
-	//memset(&_actuators, 0, sizeof(_actuators));
+	struct actuator_controls_s _actuators;
+	memset(&_actuators, 0, sizeof(_actuators));
 
 	struct vehicle_local_position_s _pos;
 	memset(&_pos, 0, sizeof(_pos));
@@ -163,7 +165,7 @@ void write_hil_controls(Autopilot_Interface &api)
 
 			orb_copy(ORB_ID(vehicle_attitude), _v_att_sub, &_v_att);
 
-			// orb_copy(ORB_ID(actuator_controls_0), _act_sub, &_actuators);
+			orb_copy(ORB_ID(actuator_controls_0), _act_sub, &_actuators);
 
 			//orb_copy(ORB_ID(track_setpoint), _track_sub, &_track);
 			
@@ -177,9 +179,6 @@ void write_hil_controls(Autopilot_Interface &api)
 
 			// James checks: See if we get data out of the orbs
 			//printf("simwrite: %0.3f %0.3f %0.3f\n",(double)_pos.x,(double)_pos.y,(double)_pos.z);
-
-
-
 
 			mavlink_simulink_t sim;
 			sim.time_usec = hrt_absolute_time();
@@ -209,10 +208,10 @@ void write_hil_controls(Autopilot_Interface &api)
 			sim.signal_1 = _rc_chan.channels[4];
 			sim.signal_2 = _rc_chan.channels[5];
 			sim.signal_3 = _rc_chan.channels[6];
-			sim.probe_1 = _test_val.value1;
-			sim.probe_2 = _test_val.value2;
-			sim.probe_3 = _test_val.value3;
-			sim.probe_4 = _test_val.value4;
+			sim.probe_1 = _actuators.control[0];
+			sim.probe_2 = _actuators.control[1];
+			sim.probe_3 = _actuators.control[2];
+			sim.probe_4 = _actuators.control[3];
 			sim.probe_5 = 0;
 			sim.probe_6 = 0;
 			api.write_sim(sim);
@@ -517,7 +516,7 @@ simulink_thread_main(int argc, char *argv[]){
 	serial_port.start();
 	autopilot_interface.start();
 	
-//	_act_sub = orb_subscribe(ORB_ID(actuator_controls_0));
+	_act_sub = orb_subscribe(ORB_ID(actuator_controls_0));
 	_rc_sub = orb_subscribe(ORB_ID(rc_channels));
 	_att_sub = orb_subscribe(ORB_ID(custom_attitude_setpoint));
 	_v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
