@@ -1390,7 +1390,10 @@ void AttitudePositionEstimatorEKF::pollData()
 	Vector3f mag(_sensor_combined.magnetometer_ga[0], _sensor_combined.magnetometer_ga[1],
 			_sensor_combined.magnetometer_ga[2]);
 
+	//printf("mag length %0.3f time %d\n",(double)mag.length(),_last_mag);
+
 	if (mag.length() > 0.1f && _last_mag != _sensor_combined.timestamp + _sensor_combined.magnetometer_timestamp_relative) {
+		//printf("in mag assignment %0.3f %0.3f %0.3f...\n",(double)mag.x,(double)mag.y,(double)mag.z);
 		_ekf->magData.x = mag.x;
 		_ekf->magData.y = mag.y;
 		_ekf->magData.z = mag.z;
