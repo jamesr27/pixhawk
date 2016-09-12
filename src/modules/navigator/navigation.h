@@ -69,6 +69,8 @@ enum NAV_CMD {
 	NAV_CMD_DO_MOUNT_CONTROL=205,
 	NAV_CMD_DO_SET_CAM_TRIGG_DIST=206,
 	NAV_CMD_DO_VTOL_TRANSITION=3000,
+	//James adds superTeddy waypoint. Use the user defined mavs that are already included...
+	NAV_CMD_WAYPOINT_USER_1=31000,
 	NAV_CMD_INVALID=UINT16_MAX /* ensure that casting a large number results in a specific error */
 };
 

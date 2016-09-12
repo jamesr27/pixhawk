@@ -60,6 +60,9 @@ uint32 VEHICLE_CMD_PAYLOAD_PREPARE_DEPLOY = 30001	# Prepare a payload deployment
 uint32 VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY = 30002	# Control a pre-programmed payload deployment
 uint32 VEHICLE_CMD_PREFLIGHT_UAVCAN = 243		# UAVCAN configuration. If param 1 == 1 actuator mapping and direction assignment should be started 
 
+# James adds the user defined stuffs.
+uint32 VEHICLE_CMD_WAYPOINT_USER_1 = 31000
+
 uint32 VEHICLE_CMD_RESULT_ACCEPTED = 0			# Command ACCEPTED and EXECUTED |
 uint32 VEHICLE_CMD_RESULT_TEMPORARILY_REJECTED = 1	# Command TEMPORARY REJECTED/DENIED |
 uint32 VEHICLE_CMD_RESULT_DENIED = 2			# Command PERMANENTLY DENIED |

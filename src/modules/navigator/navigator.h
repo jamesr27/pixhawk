@@ -71,6 +71,8 @@
 #include "gpsfailure.h"
 #include "rcloss.h"
 #include "geofence.h"
+//James adds superTeddy class
+#include "superTeddy.h"
 
 /**
  * Number of navigation modes that need on_active/on_inactive calls
