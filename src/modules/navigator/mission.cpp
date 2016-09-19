@@ -163,6 +163,7 @@ Mission::on_activation()
 void
 Mission::on_active()
 {
+	//printf("here every time?...\n");
 	check_mission_valid();
 
 	/* check if anything has changed */
@@ -206,6 +207,7 @@ Mission::on_active()
 		/* if waypoint position reached allow loiter on the setpoint */
 		if (_waypoint_position_reached && _mission_item.nav_cmd != NAV_CMD_IDLE) {
 			_navigator->set_can_loiter_at_sp(true);
+			//printf("in set loiter\n");
 		}
 	}
 
@@ -444,6 +446,8 @@ Mission::set_mission_items()
 	/* handle position mission items */
 
 
+	// James: Mission stuff gets set in the if below.
+
 	if (item_contains_position(&_mission_item)) {
 
 		/* force vtol land */
@@ -594,6 +598,17 @@ Mission::set_mission_items()
 		if (_mission_item.nav_cmd == NAV_CMD_LAND || _mission_item.nav_cmd == NAV_CMD_VTOL_LAND ) {
 			_mission_item.yaw = NAN;
 		}
+
+		// We add the superTeddy waypoint algorithm etc. stuffs here. I think only special stuff goes here.
+		// Normal setting of things goes into the mission_item_to_position_setpoint function that
+		// is called a few lines below.
+		if (_mission_item.nav_cmd == NAV_CMD_WAYPOINT_USER_1){
+			// Let's just try and make it do something simple for starters. How about loiter in a circle twice.
+			// AT some fixed altitude.
+
+
+		}
+
 
 	/* handle non-position mission items such as commands */
 	} else {

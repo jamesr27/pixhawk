@@ -235,8 +235,10 @@ bool MissionFeasibilityChecker::checkMissionItemValidity(dm_item_t dm_current, s
 		}
 
 		// check if we find unsupported items and reject mission if so
+		// James adds our superTeddy to the supported frames list.
 		if (missionitem.nav_cmd != NAV_CMD_IDLE &&
 			missionitem.nav_cmd != NAV_CMD_WAYPOINT &&
+			missionitem.nav_cmd != NAV_CMD_WAYPOINT_USER_1 &&
 			missionitem.nav_cmd != NAV_CMD_LOITER_UNLIMITED &&
 			missionitem.nav_cmd != NAV_CMD_LOITER_TIME_LIMIT &&
 			missionitem.nav_cmd != NAV_CMD_LAND &&

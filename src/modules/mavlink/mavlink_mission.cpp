@@ -836,9 +836,20 @@ MavlinkMissionManager::parse_mavlink_mission_item(const mavlink_mission_item_t *
 			mission_item->yaw = _wrap_pi(mavlink_mission_item->param4 * M_DEG_TO_RAD_F);
 			break;
 
+		// James adds: Handle the superTeddy waypoint.
+		case MAV_CMD_WAYPOINT_USER_1:
+			printf("Here custom waypoint.\n");
+			mission_item->nav_cmd = NAV_CMD_WAYPOINT_USER_1;
+			mission_item->time_inside = mavlink_mission_item->param1;
+			mission_item->acceptance_radius = mavlink_mission_item->param2;
+			mission_item->yaw = _wrap_pi(mavlink_mission_item->param4 * M_DEG_TO_RAD_F);
+			break;
+
+
 		default:
 			mission_item->nav_cmd = NAV_CMD_INVALID;
 			return MAV_MISSION_UNSUPPORTED;
+			//return MAV_MISSION_ACCEPTED;
 		}
 
 		mission_item->frame = mavlink_mission_item->frame;

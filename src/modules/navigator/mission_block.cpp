@@ -144,6 +144,8 @@ MissionBlock::is_mission_item_reached()
 			break;
 	}
 
+
+	//printf("here\n");
 	hrt_abstime now = hrt_absolute_time();
 
 	if ((_navigator->get_land_detected()->landed == false)
@@ -243,6 +245,7 @@ MissionBlock::is_mission_item_reached()
 				}
 			}
 		} else {
+			//printf("here2\n");
 			/* for normal mission items used their acceptance radius */
 			float mission_acceptance_radius = _navigator->get_acceptance_radius(_mission_item.acceptance_radius);
 
@@ -433,6 +436,7 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 		return;
 	}
 
+	printf("here1 cmd: %d\n",item->nav_cmd);
 	sp->lat = item->lat;
 	sp->lon = item->lon;
 	sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt : item->altitude;
@@ -475,6 +479,18 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 		if (_navigator->get_vstatus()->is_vtol && _param_vtol_wv_loiter.get()) {
 			sp->disable_mc_yaw_control = true;
 		}
+		break;
+
+	// Super Teddy assignments
+	case NAV_CMD_WAYPOINT_USER_1:
+		// Trying to get it to recognise it first. Simple loiter.
+		printf("here2\n");
+		sp->type = position_setpoint_s::SETPOINT_TYPE_POSITION;
+//		sp->lat = sp->lat;
+//		sp->lon = sp->lon;
+//		sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt + 50.0f: item->altitude + 50.0f;
+		//sp->loiter_radius = 60.0f;
+		//sp->loiter_direction = 1;
 		break;
 
 	default:

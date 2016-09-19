@@ -545,14 +545,17 @@ Navigator::task_main()
 					// above landing waypoint
 					_navigation_mode = &_loiter;
 					_pos_sp_triplet_published_invalid_once = false;
+					//printf("in state mission loiter\n");
 				} else {
 					_pos_sp_triplet_published_invalid_once = false;
 					_navigation_mode = &_mission;
+					//printf("in state mission \n");
 				}
 				break;
 			case vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER:
 				_pos_sp_triplet_published_invalid_once = false;
 				_navigation_mode = &_loiter;
+				//printf("in state loiter \n");
 				break;
 			case vehicle_status_s::NAVIGATION_STATE_AUTO_RCRECOVER:
 				_pos_sp_triplet_published_invalid_once = false;
