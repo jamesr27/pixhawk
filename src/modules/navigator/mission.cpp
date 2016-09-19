@@ -66,6 +66,9 @@
 #include "mission.h"
 #include "navigator.h"
 
+// James adds the superTeddy class
+#include "superTeddy.h"
+
 Mission::Mission(Navigator *navigator, const char *name) :
 	MissionBlock(navigator, name),
 	_param_onboard_enabled(this, "MIS_ONBOARD_EN", false),
@@ -87,7 +90,8 @@ Mission::Mission(Navigator *navigator, const char *name) :
 	_min_current_sp_distance_xy(FLT_MAX),
 	_mission_item_previous_alt(NAN),
 	_distance_current_previous(0.0f),
-	_work_item_type(WORK_ITEM_TYPE_DEFAULT)
+	_work_item_type(WORK_ITEM_TYPE_DEFAULT),
+	_teddyWaypoint(false)
 {
 	/* load initial params */
 	updateParams();
@@ -190,6 +194,26 @@ Mission::on_active()
 	if (onboard_updated || offboard_updated) {
 		set_mission_items();
 	}
+
+	//-----------------------------------------------------------------------------------------------------------
+	// James superTeddy additions..
+
+	// Check if the current waypoint is a superTeddy waypoint.
+	if (_mission_item.nav_cmd == NAV_CMD_WAYPOINT_USER_1){
+		_teddyWaypoint = true;
+	}
+	else {
+		_teddyWaypoint = false;
+	}
+
+	// James adds: If the next waypoint is a teddy waypoint, we must start interfering with the pixhawk original code.
+	if (_teddyWaypoint){
+
+
+	}
+	// END superTeddy additions
+	//-----------------------------------------------------------------------------------------------------------
+
 
 	/* lets check if we reached the current mission item */
 	if (_mission_type != MISSION_TYPE_NONE && is_mission_item_reached()) {
@@ -657,16 +681,32 @@ Mission::set_mission_items()
 	}
 	// TODO: report onboard mission item somehow
 
+	// James: The below bit is how a waypoint "returns". We will need to hack something in here
+	// when the teddy mission has completed....
 	if (_mission_item.autocontinue && _mission_item.time_inside <= 0.001f) {
 		/* try to process next mission item */
 
-		if (has_next_position_item) {
-			/* got next mission item, update setpoint triplet */
-			mission_item_to_position_setpoint(&mission_item_next_position, &pos_sp_triplet->next);
-		} else {
-			/* next mission item is not available */
-			pos_sp_triplet->next.valid = false;
+		// James: We let this happen for everything but the teddy waypoint.
+		if (_mission_item.nav_cmd != NAV_CMD_WAYPOINT_USER_1){
+			if (has_next_position_item) {
+				/* got next mission item, update setpoint triplet */
+				mission_item_to_position_setpoint(&mission_item_next_position, &pos_sp_triplet->next);
+			} else {
+				/* next mission item is not available */
+				pos_sp_triplet->next.valid = false;
+			}
 		}
+		// Here we deal with the superTeddy waypoint "return" conditions.
+		else if  (_mission_item.nav_cmd == NAV_CMD_WAYPOINT_USER_1){
+			if (has_next_position_item) {
+				/* got next mission item, update setpoint triplet */
+				mission_item_to_position_setpoint(&mission_item_next_position, &pos_sp_triplet->next);
+			} else {
+				/* next mission item is not available */
+				pos_sp_triplet->next.valid = false;
+			}
+		}
+
 
 	} else {
 		/* vehicle will be paused on current waypoint, don't set next item */

@@ -267,6 +267,7 @@ private:
 		WORK_ITEM_TYPE_MOVE_TO_LAND_AFTER_TRANSITION	/**<  */
 	} _work_item_type;	/**< current type of work to do (sub mission item) */
 
+	bool _teddyWaypoint;
 };
 
 #endif
