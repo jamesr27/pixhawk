@@ -165,7 +165,6 @@ Mission::on_activation()
 void
 Mission::on_active()
 {
-	//printf("here every time?...\n");
 	check_mission_valid();
 
 	/* check if anything has changed */
@@ -193,6 +192,7 @@ Mission::on_active()
 		set_mission_items();
 	}
 
+
 	//-----------------------------------------------------------------------------------------------------------
 	// James superTeddy additions..
 
@@ -206,8 +206,30 @@ Mission::on_active()
 
 	// James adds: If the next waypoint is a teddy waypoint, we must start interfering with the pixhawk original code.
 	if (_teddyWaypoint){
-		// Some junk for now.
-		//printf("teddy is current wp...\n");
+		// At the moment I think we will set the teddyWaypoint class parameters here?
+		// Still working out the best way of doing all of this.
+
+		//printf("Teddy state %d\n",superTeddyNavObject.teddy_state);
+
+		// Check if we must advance the mission.
+		if(superTeddyNavObject.isStateComplete()){
+			superTeddyNavObject.advanceTeddyState = true;
+		}
+
+		// Advance mission if the previous check passes
+		if(superTeddyNavObject.advanceTeddyState == true){
+			superTeddyNavObject.advanceState(superTeddyNavObject.teddy_state);
+			superTeddyNavObject.advanceTeddyState = false;
+		}
+
+		// First time through here, we initialise everything, and activate wind measuring state.
+		if (superTeddyNavObject.teddy_state == 0){
+			superTeddyNavObject.teddy_state++;
+			set_mission_items();		// This should set the position set point.
+		}
+
+
+
 
 
 
@@ -215,27 +237,30 @@ Mission::on_active()
 	// END superTeddy additions
 	//-----------------------------------------------------------------------------------------------------------
 
+	// James:
+	// We don't want to perform all of the standard crap if we are doing a superTeddy, so put an if around it.
 
-	/* lets check if we reached the current mission item */
-	if (_mission_type != MISSION_TYPE_NONE && is_mission_item_reached()) {
-		set_mission_item_reached();
-		if (_mission_item.autocontinue) {
-			/* switch to next waypoint if 'autocontinue' flag set */
-			advance_mission();
-			set_mission_items();
-		}
+	if (!_teddyWaypoint){
+		/* lets check if we reached the current mission item */
+		if (_mission_type != MISSION_TYPE_NONE && is_mission_item_reached()) {
+			set_mission_item_reached();
+			if (_mission_item.autocontinue) {
+				/* switch to next waypoint if 'autocontinue' flag set */
+				advance_mission();
+				set_mission_items();
+			}
 
-	} else if (_mission_type != MISSION_TYPE_NONE && _param_altmode.get() == MISSION_ALTMODE_FOH) {
-		altitude_sp_foh_update();
+		} else if (_mission_type != MISSION_TYPE_NONE && _param_altmode.get() == MISSION_ALTMODE_FOH) {
+			altitude_sp_foh_update();
 
-	} else {
-		/* if waypoint position reached allow loiter on the setpoint */
-		if (_waypoint_position_reached && _mission_item.nav_cmd != NAV_CMD_IDLE) {
-			_navigator->set_can_loiter_at_sp(true);
-			//printf("in set loiter\n");
+		} else {
+			/* if waypoint position reached allow loiter on the setpoint */
+			if (_waypoint_position_reached && _mission_item.nav_cmd != NAV_CMD_IDLE) {
+				_navigator->set_can_loiter_at_sp(true);
+				//printf("in set loiter\n");
+			}
 		}
 	}
-
 	/* see if we need to update the current yaw heading */
 	if ((_param_yawmode.get() != MISSION_YAWMODE_NONE
 			&& _param_yawmode.get() < MISSION_YAWMODE_MAX

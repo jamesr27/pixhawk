@@ -81,8 +81,8 @@ MissionBlock::MissionBlock(Navigator *navigator, const char *name) :
 	_param_yaw_timeout(this, "MIS_YAW_TMT", false),
 	_param_yaw_err(this, "MIS_YAW_ERR", false),
 	_param_vtol_wv_land(this, "VT_WV_LND_EN", false),
-	_param_vtol_wv_loiter(this, "VT_WV_LTR_EN", false),
-	superTeddyNavObject()
+	_param_vtol_wv_loiter(this, "VT_WV_LTR_EN", false)
+//	superTeddyNavObject()
 {
 }
 
@@ -501,13 +501,16 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 	// Super Teddy assignments
 	case NAV_CMD_WAYPOINT_USER_1:
 		// Trying to get it to recognise it first. Simple loiter.
-		printf("here2\n");
-		sp->type = position_setpoint_s::SETPOINT_TYPE_POSITION;
-		sp->lat = sp->lat;
-		sp->lon = sp->lon;
-		sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt + 50.0f: item->altitude + 50.0f;
-		//sp->loiter_radius = 60.0f;
-		//sp->loiter_direction = 1;
+		printf("Teddy set point assignments\n");
+		if(superTeddyNavObject.teddy_state == 1){
+			sp->type = position_setpoint_s::SETPOINT_TYPE_POSITION;
+					sp->lat = sp->lat;
+					sp->lon = sp->lon;
+					sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt + 50.0f: item->altitude + 50.0f;
+		}
+
+//		sp->loiter_radius = superTeddyNavObject.windMeasureLoiterRadius;
+//		sp->loiter_direction = 1;
 		break;
 
 	default:

@@ -153,7 +153,8 @@ protected:
 	control::BlockParamInt _param_vtol_wv_loiter;
 
 	// Give it a superTeddy navigation object.
-	superTeddyNav superTeddyNavObject;
+	//superTeddyNav(name);
+	superTeddy superTeddyNavObject;
 };
 
 #endif

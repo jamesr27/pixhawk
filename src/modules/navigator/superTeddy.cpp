@@ -14,7 +14,35 @@
 #include <uORB/topics/vtol_vehicle_status.h>
 
 #include "navigator.h"
-#include "superTeddy.h"
+//#include "superTeddy.h"
+
+superTeddy::superTeddy():
+	teddy_state(0)
+{
+}
+
+superTeddy::~superTeddy()
+{
+}
+
+bool superTeddy::isStateComplete()
+{
+	// Check if the current stage of the mission is complete. If it is return true.
+
+
+	return false;
+}
+
+void superTeddy::advanceState(int& input){
+
+	if(input <= 5 ){
+		input++;
+	}
+
+	printf("Teddy advance to: %d\n",input);
+
+}
+
 
 
 

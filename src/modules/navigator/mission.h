@@ -221,7 +221,7 @@ private:
 	 * Reset offboard mission
 	 */
 	void reset_offboard_mission(struct mission_s &mission);
-	superTeddyNav superTeddyNavObject;
+
 	/**
 	 * Returns true if we need to reset the mission
 	 */
