@@ -54,6 +54,8 @@
 
 #include "navigator_mode.h"
 
+#include "superTeddy.h"
+
 class Navigator;
 
 class MissionBlock : public NavigatorMode
@@ -149,6 +151,9 @@ protected:
 	control::BlockParamFloat _param_yaw_err;
 	control::BlockParamInt _param_vtol_wv_land;
 	control::BlockParamInt _param_vtol_wv_loiter;
+
+	// Give it a superTeddy navigation object.
+	superTeddyNav superTeddyNavObject;
 };
 
 #endif

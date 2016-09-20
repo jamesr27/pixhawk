@@ -64,6 +64,7 @@
 #include "mission_block.h"
 #include "mission_feasibility_checker.h"
 
+
 class Navigator;
 
 class Mission : public MissionBlock
@@ -203,7 +204,10 @@ private:
 	 */
 	void set_current_offboard_mission_item();
 
-	/**
+	/**		UNINITIALISED = 0,
+		WIND_MEASURING = 1,
+		PACKAGE_DELIVERY = 2,
+		PACKAGE_DELIVERED = 3
 	 * Set that the mission is finished if one exists or that none exists
 	 */
 	void set_mission_finished();
@@ -217,7 +221,7 @@ private:
 	 * Reset offboard mission
 	 */
 	void reset_offboard_mission(struct mission_s &mission);
-
+	superTeddyNav superTeddyNavObject;
 	/**
 	 * Returns true if we need to reset the mission
 	 */
@@ -268,6 +272,7 @@ private:
 	} _work_item_type;	/**< current type of work to do (sub mission item) */
 
 	bool _teddyWaypoint;
+
 };
 
 #endif

@@ -60,6 +60,8 @@
 #include "navigator.h"
 #include "mission_block.h"
 
+//#include "superTeddy.h"
+
 actuator_controls_s actuators;
 orb_advert_t actuator_pub_fd;
 
@@ -79,7 +81,8 @@ MissionBlock::MissionBlock(Navigator *navigator, const char *name) :
 	_param_yaw_timeout(this, "MIS_YAW_TMT", false),
 	_param_yaw_err(this, "MIS_YAW_ERR", false),
 	_param_vtol_wv_land(this, "VT_WV_LND_EN", false),
-	_param_vtol_wv_loiter(this, "VT_WV_LTR_EN", false)
+	_param_vtol_wv_loiter(this, "VT_WV_LTR_EN", false),
+	superTeddyNavObject()
 {
 }
 
@@ -304,7 +307,6 @@ MissionBlock::is_mission_item_reached()
 
 		/* check if the MAV was long enough inside the waypoint orbit */
 		if (now - _time_first_inside_orbit >= (hrt_abstime)_mission_item.time_inside * 1e6f) {
-
 			// exit xtrack location
 			if (_mission_item.loiter_exit_xtrack &&
 				(_mission_item.nav_cmd == NAV_CMD_LOITER_TIME_LIMIT ||
@@ -320,7 +322,22 @@ MissionBlock::is_mission_item_reached()
 		}
 	}
 
-	// all acceptance criteria must be met in the same iteration
+	// James adds superteddy waypoint completetion check here.
+	if (_mission_item.nav_cmd == NAV_CMD_WAYPOINT_USER_1){
+			if(superTeddyNavObject.missionCompleted == true){
+				_waypoint_position_reached = true;
+				_waypoint_yaw_reached = true;
+				return true;
+			}
+			else if (superTeddyNavObject.missionCompleted == false){
+				_waypoint_position_reached = false;
+				_waypoint_yaw_reached = false;
+				return false;
+			}
+
+	}
+
+	// All acceptance criteria must be met in the same iteration.
 	_waypoint_position_reached = false;
 	_waypoint_yaw_reached = false;
 	return false;
@@ -486,9 +503,9 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 		// Trying to get it to recognise it first. Simple loiter.
 		printf("here2\n");
 		sp->type = position_setpoint_s::SETPOINT_TYPE_POSITION;
-//		sp->lat = sp->lat;
-//		sp->lon = sp->lon;
-//		sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt + 50.0f: item->altitude + 50.0f;
+		sp->lat = sp->lat;
+		sp->lon = sp->lon;
+		sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt + 50.0f: item->altitude + 50.0f;
 		//sp->loiter_radius = 60.0f;
 		//sp->loiter_direction = 1;
 		break;

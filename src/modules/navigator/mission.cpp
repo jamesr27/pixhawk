@@ -66,8 +66,6 @@
 #include "mission.h"
 #include "navigator.h"
 
-// James adds the superTeddy class
-#include "superTeddy.h"
 
 Mission::Mission(Navigator *navigator, const char *name) :
 	MissionBlock(navigator, name),
@@ -208,6 +206,9 @@ Mission::on_active()
 
 	// James adds: If the next waypoint is a teddy waypoint, we must start interfering with the pixhawk original code.
 	if (_teddyWaypoint){
+		// Some junk for now.
+		//printf("teddy is current wp...\n");
+
 
 
 	}
