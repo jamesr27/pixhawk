@@ -168,6 +168,9 @@ MissionBlock::is_mission_item_reached()
 					_navigator->get_global_position()->alt,
 					&dist_xy, &dist_z);
 
+		// James adds this. We need it for later.
+		wpDistance = dist_xy;
+
 		if ((_mission_item.nav_cmd == NAV_CMD_TAKEOFF || _mission_item.nav_cmd == NAV_CMD_VTOL_TAKEOFF)
 			&& _navigator->get_vstatus()->is_rotary_wing) {
 			/* require only altitude for takeoff for multicopter, do not use waypoint acceptance radius */
@@ -244,6 +247,20 @@ MissionBlock::is_mission_item_reached()
 						} else {
 							_waypoint_yaw_reached = true;
 						}
+					}	// James adds superteddy waypoint completion check here.
+					if (_mission_item.nav_cmd == NAV_CMD_WAYPOINT_USER_1){
+						printf("Distance to teddy %0.3f\n",(double)wpDistance);
+						superTeddyNavObject.dist = wpDistance;
+						if(superTeddyNavObject.missionCompleted == true){
+							_waypoint_position_reached = true;
+							_waypoint_yaw_reached = true;
+							return true;
+						}
+						else if (superTeddyNavObject.missionCompleted == false){
+							_waypoint_position_reached = false;
+							_waypoint_yaw_reached = false;
+							return false;
+						}
 					}
 				}
 			}
@@ -266,6 +283,22 @@ MissionBlock::is_mission_item_reached()
 		if (_waypoint_position_reached) {
 			// reached just now
 			_time_wp_reached = now;
+		}
+	}
+
+	// James adds superteddy waypoint completion check here.
+	if (_mission_item.nav_cmd == NAV_CMD_WAYPOINT_USER_1){
+		//printf("Distance to teddy %0.3f\n",(double)wpDistance);
+		superTeddyNavObject.dist = wpDistance;
+		if(superTeddyNavObject.missionCompleted == true){
+			_waypoint_position_reached = true;
+			_waypoint_yaw_reached = true;
+			return true;
+		}
+		else if (superTeddyNavObject.missionCompleted == false){
+			_waypoint_position_reached = false;
+			_waypoint_yaw_reached = false;
+			return false;
 		}
 	}
 
@@ -320,21 +353,6 @@ MissionBlock::is_mission_item_reached()
 
 			return true;
 		}
-	}
-
-	// James adds superteddy waypoint completetion check here.
-	if (_mission_item.nav_cmd == NAV_CMD_WAYPOINT_USER_1){
-			if(superTeddyNavObject.missionCompleted == true){
-				_waypoint_position_reached = true;
-				_waypoint_yaw_reached = true;
-				return true;
-			}
-			else if (superTeddyNavObject.missionCompleted == false){
-				_waypoint_position_reached = false;
-				_waypoint_yaw_reached = false;
-				return false;
-			}
-
 	}
 
 	// All acceptance criteria must be met in the same iteration.
@@ -500,17 +518,26 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 
 	// Super Teddy assignments
 	case NAV_CMD_WAYPOINT_USER_1:
-		// Trying to get it to recognise it first. Simple loiter.
-		printf("Teddy set point assignments\n");
+
+		// State 1 is enroute to delivery location.
 		if(superTeddyNavObject.teddy_state == 1){
 			sp->type = position_setpoint_s::SETPOINT_TYPE_POSITION;
-					sp->lat = sp->lat;
-					sp->lon = sp->lon;
-					sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt + 50.0f: item->altitude + 50.0f;
+			sp->lat = item->lat;
+			sp->lon = item->lon;
+			sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt + 50.0f: item->altitude + 50.0f;
 		}
 
-//		sp->loiter_radius = superTeddyNavObject.windMeasureLoiterRadius;
-//		sp->loiter_direction = 1;
+		// State 2 is a loiter pattern while measuring the wind.
+		if(superTeddyNavObject.teddy_state == 2){
+			sp->type = position_setpoint_s::SETPOINT_TYPE_LOITER;
+			sp->lat = item->lat;
+			sp->lon = item->lon;
+			sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt + 50.0f: item->altitude + 50.0f;
+			sp->loiter_radius = superTeddyNavObject.windMeasureLoiterRadius;
+			sp->loiter_direction = 1;
+		}
+
+
 		break;
 
 	default:

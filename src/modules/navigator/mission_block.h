@@ -155,6 +155,7 @@ protected:
 	// Give it a superTeddy navigation object.
 	//superTeddyNav(name);
 	superTeddy superTeddyNavObject;
+	float wpDistance = -1.0f;
 };
 
 #endif

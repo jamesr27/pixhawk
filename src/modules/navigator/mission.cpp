@@ -210,6 +210,8 @@ Mission::on_active()
 		// Still working out the best way of doing all of this.
 
 		//printf("Teddy state %d\n",superTeddyNavObject.teddy_state);
+		is_mission_item_reached();
+		printf("Distance to teddy %0.3f\n",(double)superTeddyNavObject.dist);
 
 		// Check if we must advance the mission.
 		if(superTeddyNavObject.isStateComplete()){
@@ -222,7 +224,7 @@ Mission::on_active()
 			superTeddyNavObject.advanceTeddyState = false;
 		}
 
-		// First time through here, we initialise everything, and activate wind measuring state.
+		// First time through here, we initialise everything.
 		if (superTeddyNavObject.teddy_state == 0){
 			superTeddyNavObject.teddy_state++;
 			set_mission_items();		// This should set the position set point.

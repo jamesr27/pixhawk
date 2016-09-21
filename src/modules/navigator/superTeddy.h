@@ -39,6 +39,9 @@ public:
 	float windx = 0.0f;			// Position in meters away from the drop target that we want to smaple the wind at.
 	float windy = 0.0f;
 	float windMeasureLoiterRadius = 40.0f; // [m].
+	float windMeasurementAltitude = 100.0f;	// [m].
+
+	float dist = -1.0f;	// [m]. Distance we are away from current waypoint.
 
 	uint64_t measurestartTime = 0;	// Place holder for wind measurement start time.
 
