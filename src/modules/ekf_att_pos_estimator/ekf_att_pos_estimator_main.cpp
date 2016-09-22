@@ -1106,10 +1106,12 @@ void AttitudePositionEstimatorEKF::publishWindEstimate()
 	if (_wind_pub != nullptr) {
 		/* publish the wind estimate */
 		orb_publish(ORB_ID(wind_estimate), _wind_pub, &_wind);
+		//printf("Wind EKF %0.3f %0.3f\n",(double)_wind.windspeed_north,(double)_wind.windspeed_east);
 
 	} else {
 		/* advertise and publish */
 		_wind_pub = orb_advertise(ORB_ID(wind_estimate), &_wind);
+
 	}
 
 }

@@ -532,9 +532,22 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 			sp->type = position_setpoint_s::SETPOINT_TYPE_LOITER;
 			sp->lat = item->lat;
 			sp->lon = item->lon;
-			sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt + 50.0f: item->altitude + 50.0f;
+			sp->alt = superTeddyNavObject.windMeasurementAltitude;
+			//sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt + 50.0f: item->altitude + 50.0f;
 			sp->loiter_radius = superTeddyNavObject.windMeasureLoiterRadius;
 			sp->loiter_direction = 1;
+			printf("Teddy state 2 set\n.");
+		}
+
+		// State 3 is a loiter pattern while measuring the wind. Junk for now.
+		if(superTeddyNavObject.teddy_state == 3){
+			sp->type = position_setpoint_s::SETPOINT_TYPE_LOITER;
+			sp->lat = item->lat + 0.002;
+			sp->lon = item->lon + 0.000;
+			sp->alt = superTeddyNavObject.windMeasurementAltitude;
+			sp->loiter_radius = superTeddyNavObject.windMeasureLoiterRadius;
+			sp->loiter_direction = -1;
+			printf("Teddy state 3 set.\n");
 		}
 
 

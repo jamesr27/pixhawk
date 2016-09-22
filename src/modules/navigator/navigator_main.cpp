@@ -72,6 +72,7 @@
 #include <uORB/topics/fence.h>
 #include <uORB/topics/fw_pos_ctrl_status.h>
 #include <uORB/topics/vehicle_command.h>
+#include <uORB/topics/wind_estimate.h>
 #include <drivers/drv_baro.h>
 
 #include <systemlib/err.h>
@@ -164,7 +165,8 @@ Navigator::Navigator() :
 	_param_cruising_speed_plane(this, "FW_AIRSPD_TRIM", false),
 	_param_cruising_throttle_plane(this, "FW_THR_CRUISE", false),
 	_mission_cruising_speed(-1.0f),
-	_mission_throttle(-1.0f)
+	_mission_throttle(-1.0f),
+	_wind_estimate_sub(-1)
 {
 	/* Create a list of our possible navigation types */
 	_navigation_mode_array[0] = &_mission;
@@ -267,6 +269,13 @@ Navigator::vehicle_control_mode_update()
 }
 
 void
+Navigator::wind_estimate_update()
+{
+	orb_copy(ORB_ID(wind_estimate), _wind_estimate_sub, &_wind_estimate);
+	//printf("Nav wind %0.3f %0.3f\n",(double)_wind_estimate.windspeed_north,(double)_wind_estimate.windspeed_east);
+}
+
+void
 Navigator::params_update()
 {
 	parameter_update_s param_update;
@@ -312,6 +321,7 @@ Navigator::task_main()
 	_offboard_mission_sub = orb_subscribe(ORB_ID(offboard_mission));
 	_param_update_sub = orb_subscribe(ORB_ID(parameter_update));
 	_vehicle_command_sub = orb_subscribe(ORB_ID(vehicle_command));
+	_wind_estimate_sub = orb_subscribe(ORB_ID(wind_estimate));
 
 	/* copy all topics first time */
 	vehicle_status_update();
@@ -323,6 +333,7 @@ Navigator::task_main()
 	home_position_update(true);
 	fw_pos_ctrl_status_update();
 	params_update();
+	wind_estimate_update();
 
 	/* wakeup source(s) */
 	px4_pollfd_struct_t fds[2] = {};
@@ -411,6 +422,12 @@ Navigator::task_main()
 		orb_check(_home_pos_sub, &updated);
 		if (updated) {
 			home_position_update();
+		}
+
+		// Wind estimate copy
+		orb_check(_wind_estimate_sub, &updated);
+		if (updated) {
+			wind_estimate_update();
 		}
 
 		orb_check(_vehicle_command_sub, &updated);

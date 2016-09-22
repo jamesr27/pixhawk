@@ -58,6 +58,7 @@
 #include <uORB/topics/geofence_result.h>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
 #include <uORB/topics/vehicle_land_detected.h>
+#include <uORB/topics/wind_estimate.h>
 
 #include "navigator_mode.h"
 #include "mission.h"
@@ -149,6 +150,7 @@ public:
 	struct mission_result_s*	    get_mission_result() { return &_mission_result; }
 	struct geofence_result_s*		    get_geofence_result() { return &_geofence_result; }
 	struct vehicle_attitude_setpoint_s* get_att_sp() { return &_att_sp; }
+	struct wind_estimate_s _wind_estimate;
 
 	int		get_onboard_mission_sub() { return _onboard_mission_sub; }
 	int		get_offboard_mission_sub() { return _offboard_mission_sub; }
@@ -382,5 +384,11 @@ private:
 	 */
 	Navigator(const Navigator&);
 	Navigator operator=(const Navigator&);
+
+	// James adds wind subscription to the navigator
+	int _wind_estimate_sub;
+
+
+	void		wind_estimate_update();
 };
 #endif

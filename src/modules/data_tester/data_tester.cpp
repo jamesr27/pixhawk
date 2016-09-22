@@ -47,6 +47,7 @@
 #include <uORB/topics/differential_pressure.h>
 #include <uORB/topics/control_state.h>
 #include <uORB/topics/airspeed.h>
+#include <uORB/topics/wind_estimate.h>
 
 extern "C" __EXPORT int data_tester_main(int argc, char *argv[]);
 
@@ -60,6 +61,7 @@ static int _gps_pos_sub = 0;
 static int _control_state_sub = 0;
 static int _differential_pressure_sub = 0;
 static int _airspeed_sub = 0;
+static int _wind_estimate_sub = 0;
 
 // Prototypes
 int data_tester_thread_main(int argc, char *argv[]);
@@ -88,12 +90,16 @@ data_tester_thread_main(int argc, char *argv[]){
 	struct airspeed_s _airspeed;
 	memset(&_airspeed, 0, sizeof(_airspeed));
 
+	struct wind_estimate_s _wind_estimate;
+	memset(&_wind_estimate, 0, sizeof(_wind_estimate));
+
 	// Subscribe to orbs
 	_sensors_sub = orb_subscribe(ORB_ID(sensor_combined));
 	_gps_pos_sub = orb_subscribe(ORB_ID(vehicle_gps_position));
 	_control_state_sub = orb_subscribe(ORB_ID(control_state));
 	_differential_pressure_sub = orb_subscribe(ORB_ID(differential_pressure));
 	_airspeed_sub = orb_subscribe(ORB_ID(airspeed));
+	_wind_estimate_sub =  orb_subscribe(ORB_ID(wind_estimate));
 
 	// Main thread.
 	while(!thread_should_exit){
@@ -102,14 +108,16 @@ data_tester_thread_main(int argc, char *argv[]){
 		orb_copy(ORB_ID(control_state), _control_state_sub, &_control_state);
 		orb_copy(ORB_ID(differential_pressure),_differential_pressure_sub, &_differential_pressure);
 		orb_copy(ORB_ID(airspeed), _airspeed_sub, &_airspeed);
+		orb_copy(ORB_ID(wind_estimate), _wind_estimate_sub, &_wind_estimate);
 
 		// Print data to terminal
 		//printf("Sensors: a: %0.3f %0.3f %0.3f m: %0.3f t: %0.3f\n",(double)_hil_sensors.accelerometer_m_s2[0],(double)_hil_sensors.accelerometer_m_s2[1],(double)_hil_sensors.accelerometer_m_s2[2],(double)_hil_sensors.magnetometer_ga[0],(double)_hil_sensors.baro_temp_celcius);
 		//printf("SensTime: gi %0.3f ai %0.3f ar %0.3f mr %0.3f\n",(double)_hil_sensors.gyro_integral_dt,(double)_hil_sensors.accelerometer_integral_dt,(double)_hil_sensors.accelerometer_timestamp_relative,(double)_hil_sensors.magnetometer_timestamp_relative);
-		printf("GPS: lat %0.3f lon %0.3f alt %0.3f\n",(double)_hil_gps.lat,(double)_hil_gps.lon,(double)_hil_gps.alt);
-		printf("Control State: as %0.3f xa %0.3f zp %0.3f\n",(double)_control_state.airspeed,(double)_control_state.x_acc,(double)_control_state.z_pos);
+		//printf("GPS: lat %0.3f lon %0.3f alt %0.3f\n",(double)_hil_gps.lat,(double)_hil_gps.lon,(double)_hil_gps.alt);
+		//printf("Control State: as %0.3f xa %0.3f zp %0.3f\n",(double)_control_state.airspeed,(double)_control_state.x_acc,(double)_control_state.z_pos);
 		//printf("dpress: %0.3f %0.3f %0.3f\n",(double)_differential_pressure.differential_pressure_filtered_pa,(double)_differential_pressure.differential_pressure_raw_pa,(double)_differential_pressure.temperature);
-		printf("airspeed: %0.3f %0.3f %0.3f %0.3f\n",(double)_airspeed.true_airspeed_m_s,(double)_airspeed.true_airspeed_unfiltered_m_s,(double)_airspeed.indicated_airspeed_m_s,(double)_airspeed.timestamp);
+		//printf("airspeed: %0.3f %0.3f %0.3f %0.3f\n",(double)_airspeed.true_airspeed_m_s,(double)_airspeed.true_airspeed_unfiltered_m_s,(double)_airspeed.indicated_airspeed_m_s,(double)_airspeed.timestamp);
+		printf("wind speed: %0.3f %0.3f\n",(double)_wind_estimate.windspeed_north,(double)_wind_estimate.windspeed_east);
 
 		usleep(500000);
 	}
