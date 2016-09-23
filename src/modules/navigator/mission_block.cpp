@@ -471,7 +471,7 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 		return;
 	}
 
-	printf("here1 cmd: %d\n",item->nav_cmd);
+	//printf("here1 cmd: %d\n",item->nav_cmd);
 	sp->lat = item->lat;
 	sp->lon = item->lon;
 	sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt : item->altitude;
@@ -539,15 +539,48 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 			printf("Teddy state 2 set\n.");
 		}
 
-		// State 3 is a loiter pattern while measuring the wind. Junk for now.
+		// State 3 predelivery. Move up wind of drop zone, once reached we switch into delivery mode.
 		if(superTeddyNavObject.teddy_state == 3){
-			sp->type = position_setpoint_s::SETPOINT_TYPE_LOITER;
-			sp->lat = item->lat + 0.002;
-			sp->lon = item->lon + 0.000;
-			sp->alt = superTeddyNavObject.windMeasurementAltitude;
-			sp->loiter_radius = superTeddyNavObject.windMeasureLoiterRadius;
-			sp->loiter_direction = -1;
+			sp->type = position_setpoint_s::SETPOINT_TYPE_POSITION;
+			sp->lat = item->lat - 0;
+			sp->lon = item->lon - 0;
+			sp->alt = superTeddyNavObject.tetherLength + superTeddyNavObject.startDeliveryOffset;
+			sp->cruising_speed = superTeddyNavObject.teddySpeed;
 			printf("Teddy state 3 set.\n");
+		}
+
+		// State 4 delivery. The delivery drop mode.
+		if(superTeddyNavObject.teddy_state == 4){
+			sp->type = position_setpoint_s::SETPOINT_TYPE_LOITER;
+
+			float offsetDistance[] = {0,0};
+			superTeddyNavObject.updateManouevreSetPoint(offsetDistance,item->lat,item->lon);
+
+			sp->lat = item->lat + (double)offsetDistance[0];
+			sp->lon = item->lon + (double)offsetDistance[1];
+			sp->alt = superTeddyNavObject.zsp;
+			sp->cruising_speed = superTeddyNavObject.teddySpeed;
+			sp->loiter_radius = superTeddyNavObject.circleRadius;
+			sp->loiter_direction = 1;
+
+			printf("Teddy state 4.\n");
+		}
+
+		// State 5 delivery complete. Simply ascend, travelling down wind.
+		if(superTeddyNavObject.teddy_state == 5){
+			sp->type = position_setpoint_s::SETPOINT_TYPE_LOITER;
+
+			float offsetDistance[] = {0,0};
+			superTeddyNavObject.updateManouevreSetPointAscent(offsetDistance,item->lat,item->lon);
+
+			sp->lat = item->lat + (double)offsetDistance[0];
+			sp->lon = item->lon + (double)offsetDistance[1];
+			sp->alt = superTeddyNavObject.zsp;
+			sp->cruising_speed = superTeddyNavObject.teddySpeed;
+			sp->loiter_radius = superTeddyNavObject.circleRadius;
+			sp->loiter_direction = 1;
+
+			printf("Teddy state 5.\n");
 		}
 
 

@@ -216,6 +216,9 @@ Mission::on_active()
 		// Get the wind estimate
 		superTeddyNavObject.assignWind(_navigator->_wind_estimate.windspeed_north,_navigator->_wind_estimate.windspeed_east);
 
+		// Get the radio channel into the superTeddy.
+		superTeddyNavObject.getRadio(_navigator->_rc_channels.channels[8]);
+
 		// Check if we must advance the mission.
 		if(superTeddyNavObject.isStateComplete()){
 			superTeddyNavObject.advanceTeddyState = true;
@@ -235,6 +238,28 @@ Mission::on_active()
 		}
 
 
+		// When in the delivery mode, we need to update the set point continuously, based upon time.
+		if (superTeddyNavObject.teddy_state == 4){
+			// Set mission items.
+			set_mission_items();
+			// Sleep a bit to keep load down. I don't know if this is a good idea or not.
+			usleep(100000);
+		}
+
+		// Ascent mode is just the reverse of delivery mode, let's treat it as such.
+		if (superTeddyNavObject.teddy_state == 5){
+			// Set mission items.
+			set_mission_items();
+			usleep(100000);
+		}
+
+		if (superTeddyNavObject.teddy_state == 6){
+			// We need to tell the navigator the waypoint is complete.
+			// Not sure about this, but just copied from below
+			set_mission_item_reached();
+			advance_mission();
+			set_mission_items();
+		}
 
 
 

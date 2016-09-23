@@ -166,7 +166,8 @@ Navigator::Navigator() :
 	_param_cruising_throttle_plane(this, "FW_THR_CRUISE", false),
 	_mission_cruising_speed(-1.0f),
 	_mission_throttle(-1.0f),
-	_wind_estimate_sub(-1)
+	_wind_estimate_sub(-1),
+	_rc_channels_sub(-1)
 {
 	/* Create a list of our possible navigation types */
 	_navigation_mode_array[0] = &_mission;
@@ -276,6 +277,12 @@ Navigator::wind_estimate_update()
 }
 
 void
+Navigator::rc_channels_update()
+{
+	orb_copy(ORB_ID(rc_channels), _rc_channels_sub, &_rc_channels);
+}
+
+void
 Navigator::params_update()
 {
 	parameter_update_s param_update;
@@ -322,6 +329,7 @@ Navigator::task_main()
 	_param_update_sub = orb_subscribe(ORB_ID(parameter_update));
 	_vehicle_command_sub = orb_subscribe(ORB_ID(vehicle_command));
 	_wind_estimate_sub = orb_subscribe(ORB_ID(wind_estimate));
+	_rc_channels_sub = orb_subscribe(ORB_ID(rc_channels));
 
 	/* copy all topics first time */
 	vehicle_status_update();
@@ -334,6 +342,7 @@ Navigator::task_main()
 	fw_pos_ctrl_status_update();
 	params_update();
 	wind_estimate_update();
+	rc_channels_update();
 
 	/* wakeup source(s) */
 	px4_pollfd_struct_t fds[2] = {};
@@ -429,6 +438,13 @@ Navigator::task_main()
 		if (updated) {
 			wind_estimate_update();
 		}
+
+		// RC channels copy
+		orb_check(_rc_channels_sub, &updated);
+		if (updated) {
+			rc_channels_update();
+		}
+
 
 		orb_check(_vehicle_command_sub, &updated);
 		if (updated) {
