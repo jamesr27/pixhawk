@@ -524,7 +524,7 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 			sp->type = position_setpoint_s::SETPOINT_TYPE_POSITION;
 			sp->lat = item->lat;
 			sp->lon = item->lon;
-			sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt + 50.0f: item->altitude + 50.0f;
+			sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt: item->altitude;
 		}
 
 		// State 2 is a loiter pattern while measuring the wind.
@@ -532,7 +532,8 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 			sp->type = position_setpoint_s::SETPOINT_TYPE_LOITER;
 			sp->lat = item->lat;
 			sp->lon = item->lon;
-			sp->alt = superTeddyNavObject.windMeasurementAltitude;
+			//sp->alt = superTeddyNavObject.windMeasurementAltitude;
+			sp->alt = item->altitude_is_relative ? superTeddyNavObject.windMeasurementAltitude + _navigator->get_home_position()->alt:superTeddyNavObject.windMeasurementAltitude;
 			//sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt + 50.0f: item->altitude + 50.0f;
 			sp->loiter_radius = superTeddyNavObject.windMeasureLoiterRadius;
 			sp->loiter_direction = 1;
@@ -544,7 +545,8 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 			sp->type = position_setpoint_s::SETPOINT_TYPE_POSITION;
 			sp->lat = item->lat - 0;
 			sp->lon = item->lon - 0;
-			sp->alt = superTeddyNavObject.tetherLength + superTeddyNavObject.startDeliveryOffset;
+			//sp->alt = superTeddyNavObject.tetherLength + superTeddyNavObject.startDeliveryOffset;
+			sp->alt = item->altitude_is_relative ? superTeddyNavObject.tetherLength + superTeddyNavObject.startDeliveryOffset + _navigator->get_home_position()->alt:superTeddyNavObject.tetherLength + superTeddyNavObject.startDeliveryOffset;
 			sp->cruising_speed = superTeddyNavObject.teddySpeed;
 			printf("Teddy state 3 set.\n");
 		}
@@ -558,7 +560,8 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 
 			sp->lat = item->lat + (double)offsetDistance[0];
 			sp->lon = item->lon + (double)offsetDistance[1];
-			sp->alt = superTeddyNavObject.zsp;
+			//sp->alt = superTeddyNavObject.zsp;
+			sp->alt = item->altitude_is_relative ? superTeddyNavObject.zsp + _navigator->get_home_position()->alt:superTeddyNavObject.zsp;
 			sp->cruising_speed = superTeddyNavObject.teddySpeed;
 			sp->loiter_radius = superTeddyNavObject.circleRadius;
 			sp->loiter_direction = 1;
@@ -575,7 +578,8 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 
 			sp->lat = item->lat + (double)offsetDistance[0];
 			sp->lon = item->lon + (double)offsetDistance[1];
-			sp->alt = superTeddyNavObject.zsp;
+			//sp->alt = superTeddyNavObject.zsp;
+			sp->alt = item->altitude_is_relative ? superTeddyNavObject.zsp + _navigator->get_home_position()->alt:superTeddyNavObject.zsp;
 			sp->cruising_speed = superTeddyNavObject.teddySpeed;
 			sp->loiter_radius = superTeddyNavObject.circleRadius;
 			sp->loiter_direction = 1;

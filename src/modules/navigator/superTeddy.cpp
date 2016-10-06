@@ -159,7 +159,7 @@ void superTeddy::updateManouevreSetPoint(float (&offset)[2], float lat, float lo
 	//	3. We descend vertically to below the tether length by the offset specified.
 	//
 	// Remember that we are calculating an offset from the original waypoint in meters. We then need to transform this
-	// to a value in decimal degrees. This get added to the original waypoint coordinates later.
+	// to a value in decimal degrees. This gets added to the original waypoint coordinates later.
 
 	// 1.
 	if (manTime <= 20.0f){
