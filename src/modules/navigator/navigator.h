@@ -219,6 +219,7 @@ public:
 	void 		set_mission_failure(const char *reason);
 
 	bool		is_planned_mission() { return _navigation_mode == &_mission; }
+	//orb_advert_t _mavlink_fd;
 
 private:
 
@@ -394,5 +395,7 @@ private:
 
 	void		wind_estimate_update();
 	void		rc_channels_update();
+
+
 };
 #endif

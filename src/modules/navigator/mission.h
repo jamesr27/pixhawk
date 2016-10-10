@@ -273,6 +273,7 @@ private:
 
 	bool _teddyWaypoint;
 
+
 };
 
 #endif

@@ -66,6 +66,7 @@ actuator_controls_s actuators;
 orb_advert_t actuator_pub_fd;
 
 
+
 MissionBlock::MissionBlock(Navigator *navigator, const char *name) :
 	NavigatorMode(navigator, name),
 	_mission_item({0}),
@@ -524,7 +525,7 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 			sp->type = position_setpoint_s::SETPOINT_TYPE_POSITION;
 			sp->lat = item->lat;
 			sp->lon = item->lon;
-			sp->alt = item->altitude_is_relative ? item->altitude + _navigator->get_home_position()->alt: item->altitude;
+			sp->alt = item->altitude_is_relative ? superTeddyNavObject.tetherLength + superTeddyNavObject.startDeliveryOffset + _navigator->get_home_position()->alt: item->altitude;
 		}
 
 		// State 2 is a loiter pattern while measuring the wind.
@@ -538,6 +539,7 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 			sp->loiter_radius = superTeddyNavObject.windMeasureLoiterRadius;
 			sp->loiter_direction = 1;
 			printf("Teddy state 2 set\n.");
+			//mavlink_log_info(&_navigator->_mavlink_fd, "Teddy State 2");
 		}
 
 		// State 3 predelivery. Move up wind of drop zone, once reached we switch into delivery mode.
@@ -549,6 +551,7 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 			sp->alt = item->altitude_is_relative ? superTeddyNavObject.tetherLength + superTeddyNavObject.startDeliveryOffset + _navigator->get_home_position()->alt:superTeddyNavObject.tetherLength + superTeddyNavObject.startDeliveryOffset;
 			sp->cruising_speed = superTeddyNavObject.teddySpeed;
 			printf("Teddy state 3 set.\n");
+			//mavlink_log_info(&_navigator->_mavlink_fd, "Teddy State 3");
 		}
 
 		// State 4 delivery. The delivery drop mode.
@@ -567,6 +570,7 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 			sp->loiter_direction = 1;
 
 			printf("Teddy state 4.\n");
+			//mavlink_log_info(&_navigator->_mavlink_fd, "Teddy State 4");
 		}
 
 		// State 5 delivery complete. Simply ascend, travelling down wind.
@@ -585,6 +589,7 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 			sp->loiter_direction = 1;
 
 			printf("Teddy state 5.\n");
+			//mavlink_log_info(&_navigator->_mavlink_fd, "Teddy State 5");
 		}
 
 

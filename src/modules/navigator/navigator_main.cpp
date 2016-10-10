@@ -298,6 +298,9 @@ Navigator::task_main_trampoline(int argc, char *argv[])
 void
 Navigator::task_main()
 {
+	// James tries to mavlink log info out...
+	//_mavlink_fd = px4_open("dev/mavlink", 0);
+
 	bool have_geofence_position_data = false;
 
 	/* Try to load the geofence:

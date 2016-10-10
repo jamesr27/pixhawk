@@ -67,6 +67,7 @@
 #include "navigator.h"
 
 
+
 Mission::Mission(Navigator *navigator, const char *name) :
 	MissionBlock(navigator, name),
 	_param_onboard_enabled(this, "MIS_ONBOARD_EN", false),
@@ -160,6 +161,7 @@ void
 Mission::on_activation()
 {
 	set_mission_items();
+
 }
 
 void

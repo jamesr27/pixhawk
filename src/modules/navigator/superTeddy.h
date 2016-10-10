@@ -31,9 +31,9 @@ public:
 	int teddy_state;
 
 	// Manouevre parameters
-	float tetherLength = 80.0f;	// [m] tether length
-	float circleRadius = 35.0f;	// [m] teddy circle radius.
-	float teddySpeed = 20.0f;	// [m/s] speed during delivery
+	float tetherLength = 60.0f;	// [m] tether length
+	float circleRadius = 30.0f;	// [m] teddy circle radius.
+	float teddySpeed = 13.0f;	// [m/s] speed during delivery
 	float descentRate = 2.0f;	// [m/s] descent rate during package delivery.
 	float teddyG = 1.6f;		// [g] G to pull during the turn, not used at present.
 	float startDeliveryOffset = 20.0f;	//[m] Altitude offset to start circling manouevre at. Roughly achieve 2 circles
