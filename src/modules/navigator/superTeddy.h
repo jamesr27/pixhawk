@@ -32,7 +32,7 @@ public:
 
 	// Manouevre parameters
 	float tetherLength = 60.0f;	// [m] tether length
-	float circleRadius = 30.0f;	// [m] teddy circle radius.
+	float circleRadius = 40.0f;	// [m] teddy circle radius.
 	float teddySpeed = 13.0f;	// [m/s] speed during delivery
 	float descentRate = 2.0f;	// [m/s] descent rate during package delivery.
 	float teddyG = 1.6f;		// [g] G to pull during the turn, not used at present.
@@ -59,13 +59,14 @@ public:
 	float windy = 0.0f;
 	float windRunning_vx = 0;
 	float windRunning_vy = 0;
-	float windMeasureLoiterRadius = 50.0f; // [m].
-	float windMeasurementAltitude = 100.0f;	// [m].
+	float windMeasureLoiterRadius = 60.0f; // [m].
+	float windMeasurementAltitude = 80.0f;	// [m].
 	float channel9 = -1.0f;	// The radio channel we are using to trigger certain events in superTeddy.
 
 	float dist = -1.0f;	// [m]. Distance we are away from current waypoint.
 
 	uint64_t measureStartTime = 0;	// Place holder for wind measurement start time.
+	uint64_t windManouevreEndTime = 0;
 
 	bool missionCompleted = false;	// We are going to trigger the mission completed on a transmitter switch for now.
 	bool advanceTeddyState = false; // Keep track of whether we should advance the mission state.

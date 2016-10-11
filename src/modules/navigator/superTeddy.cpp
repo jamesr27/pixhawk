@@ -61,6 +61,9 @@ bool superTeddy::isStateComplete()
 			wind_vx = windRunning_vx;
 			wind_vy = windRunning_vy;
 			printf("Teddy measured wind: %0.3f %0.3f\n",(double)wind_vx,(double)wind_vy);
+			// Calculate the manouevre geometry for stage 4.
+			manoeuvreGeometry();
+			windManouevreEndTime = timeNow;
 			return true;
 		}
 	}
@@ -68,12 +71,11 @@ bool superTeddy::isStateComplete()
 	// State 3: Pre-delivery. This is a waypoint upwind. We move to this after we've measured the wind. After
 	// this we then start the teddy manoeuvre.
 	// The dist here may not work as we expect, but let's go with it for now.
+	// No it really doesn't work as we want. We'll hack in a time delay for now.
 	if (teddy_state == 3){
-		//printf("3: dist %0.3f\n",(double)dist);
-		if (dist <= 50.f && dist >= 0.0f){
+		timeNow = hrt_absolute_time();
+		if (dist <= 30.f && dist >= 0.0f){
 			teddyStartTime = hrt_absolute_time();
-			// Calculate the manouevre geometry for stage 4.
-			manoeuvreGeometry();
 			return true;
 		}
 	}
@@ -153,6 +155,8 @@ void superTeddy::updateManouevreSetPoint(float (&offset)[2], float lat, float lo
 	float manTime = (float)(timeNow - teddyStartTime)/1000000.0f; //Time we are into the manoevure in seconds.
 	float returnValue[]={0,0};	// [m], x and y for now.
 
+	// Some hacking to the below equations has occurred. Mostly for testing pruposes.
+
 	// We have 3 phases (currently).
 	//	1. We don't move the setpoint for the first 20 seconds.
 	//	2. We then descend along the path.
@@ -161,10 +165,14 @@ void superTeddy::updateManouevreSetPoint(float (&offset)[2], float lat, float lo
 	// Remember that we are calculating an offset from the original waypoint in meters. We then need to transform this
 	// to a value in decimal degrees. This gets added to the original waypoint coordinates later.
 
+	// Hack in an effort to delay the whole manouevre by 20 seconds.
+	manTime = manTime - 20.0f;
 	// 1.
 	if (manTime <= 20.0f){
-		returnValue[0] = man_xc;
-		returnValue[1] = man_yc;
+		returnValue[0] = man_xm * (manTime) + 3*man_xc;
+		returnValue[1] = man_ym * (manTime) + 3*man_yc;
+		//returnValue[0] = man_xc;
+		//returnValue[1] = man_yc;
 		// Alt
 		zsp = man_zc;
 	}
@@ -202,6 +210,10 @@ void superTeddy::updateManouevreSetPoint(float (&offset)[2], float lat, float lo
 	returnValue[0] = xyM[0];
 	returnValue[1] = xyM[1];
 
+	// Assign to offset?
+	offset[0] = returnValue[0];
+	offset[1] = returnValue[1];
+
 	printf("%0.7f %0.7f\n",(double)returnValue[0],(double)returnValue[1]);
 }
 
@@ -220,12 +232,15 @@ void superTeddy::updateManouevreSetPointAscent(float (&offset)[2], float lat, fl
 	// Remember that we are calculating an offset from the original waypoint in meters. We then need to transform this
 	// to a value in decimal degrees. This get added to the original waypoint coordinates later.
 
+	// Some more hacking. Make it ascend quickly.
+
 	// 1.
 	if (manTime <= ((startDeliveryOffset + endDeliveryOffset)/descentRate)){
 		returnValue[0] = man_xm * manTime;
 		returnValue[1] = man_ym * manTime;
 		// Alt
-		zsp = -man_zm * (manTime) + (tetherLength - endDeliveryOffset);
+		//zsp = -man_zm * (manTime) + (tetherLength - endDeliveryOffset);
+		zsp = tetherLength + endDeliveryOffset;
 	}
 	else
 	{
@@ -244,6 +259,10 @@ void superTeddy::updateManouevreSetPointAscent(float (&offset)[2], float lat, fl
 
 	returnValue[0] = xyM[0];
 	returnValue[1] = xyM[1];
+
+	// Assign to offset?
+	offset[0] = returnValue[0];
+	offset[1] = returnValue[1];
 
 	printf("%0.7f %0.7f\n",(double)returnValue[0],(double)returnValue[1]);
 }

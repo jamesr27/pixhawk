@@ -545,8 +545,13 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 		// State 3 predelivery. Move up wind of drop zone, once reached we switch into delivery mode.
 		if(superTeddyNavObject.teddy_state == 3){
 			sp->type = position_setpoint_s::SETPOINT_TYPE_POSITION;
-			sp->lat = item->lat - 0;
-			sp->lon = item->lon - 0;
+			// Bit of hacking in here for the offset.
+			float offsetDistance[] = {0,0};
+
+			superTeddyNavObject.latLonToMeterScaling(offsetDistance,3*superTeddyNavObject.man_xc,3*superTeddyNavObject.man_yc);
+
+			sp->lat = item->lat + (double)offsetDistance[0];
+			sp->lon = item->lon + (double)offsetDistance[1];
 			//sp->alt = superTeddyNavObject.tetherLength + superTeddyNavObject.startDeliveryOffset;
 			sp->alt = item->altitude_is_relative ? superTeddyNavObject.tetherLength + superTeddyNavObject.startDeliveryOffset + _navigator->get_home_position()->alt:superTeddyNavObject.tetherLength + superTeddyNavObject.startDeliveryOffset;
 			sp->cruising_speed = superTeddyNavObject.teddySpeed;
@@ -563,6 +568,7 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 
 			sp->lat = item->lat + (double)offsetDistance[0];
 			sp->lon = item->lon + (double)offsetDistance[1];
+			//printf("2nd check: %0.7f %0.7f\n",(double)offsetDistance[0],(double)offsetDistance[1]);
 			//sp->alt = superTeddyNavObject.zsp;
 			sp->alt = item->altitude_is_relative ? superTeddyNavObject.zsp + _navigator->get_home_position()->alt:superTeddyNavObject.zsp;
 			sp->cruising_speed = superTeddyNavObject.teddySpeed;
