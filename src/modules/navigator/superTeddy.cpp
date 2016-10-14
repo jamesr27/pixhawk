@@ -74,7 +74,7 @@ bool superTeddy::isStateComplete()
 	// No it really doesn't work as we want. We'll hack in a time delay for now.
 	if (teddy_state == 3){
 		timeNow = hrt_absolute_time();
-		if (dist <= 30.f && dist >= 0.0f){
+		if (dist <= 50.f && dist >= 0.0f){
 			teddyStartTime = hrt_absolute_time();
 			return true;
 		}
