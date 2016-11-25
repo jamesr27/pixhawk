@@ -544,7 +544,7 @@ private:
 
 	math::Vector<2> get_local_planar_vector(const math::Vector<2> &origin, const math::Vector<2> &target) const;
 
-	void latLonToMeterScaling(float (&xy)[2],float lat,float lon);
+	void meterToLatLonScaling(float (&xy)[2],float lat,float lon);
 
 };
 
@@ -1246,34 +1246,30 @@ float FixedwingPositionControl::navigate_circle2(const struct position_setpoint_
 
 	// Get position of the centre of the circle. The loiter waypoint position then...
 	// How does the teddy controller modify the setpoint? Still check that this will work...
-	//math::Vector<2> circle_centre((float)pos_sp_triplet.current.lat,(float)pos_sp_triplet.current.lon);
-	float xyM[] = {0.0f,0.0f};
-	latLonToMeterScaling(xyM,(float)pos_sp_triplet.current.lat,(float)pos_sp_triplet.current.lon);
+	math::Vector<2> circle_centre((float)pos_sp_triplet.current.lat,(float)pos_sp_triplet.current.lon);
+
+	//float xyM[] = {0.0f,0.0f};
+	//latLonToMeterScaling(xyM,(float)pos_sp_triplet.current.lat,(float)pos_sp_triplet.current.lon);
 	//math::Vector<2> circle_centre(xyM[0],xyM[1]);
 
-	// Need to subtract the local position of home from this
-	float homeM[] = {0.0f,0.0f};
+	//printf("circleCentre: %0.5f %0.5f\n",(double)(circle_centre.data[0]),(double)(circle_centre.data[1]));
 
-	latLonToMeterScaling(homeM,(float)_home_position.lat,(float)_home_position.lon);
-	math::Vector<2> circle_centre(xyM[0] - homeM[0],xyM[1]- homeM[1]);
-
-	printf("circleCentre: %0.5f %0.5f\n",(double)(xyM[0] - homeM[0]),(double)(xyM[1] - homeM[1]));
-
-	//math::Vector<2> current_global_position((float)_global_pos.lat,(float)_global_pos.lon);
-
-	// Our current location
-	math::Vector<2> current_location((float)_local_pos.x,(float)_local_pos.y);
-	printf("circleCentre: %0.5f %0.5f loc: %0.5f %0.5f\n",(double)(xyM[0] - homeM[0]),(double)(xyM[1] - homeM[1]),(double)_local_pos.x,(double)_local_pos.y);
+	math::Vector<2> current_global_position((float)_global_pos.lat,(float)_global_pos.lon);
 
 
-
-	// Calculate location of point 1
-	math::Vector<2> vPlane = current_location - circle_centre;
+	// Calculate location of point 1. We are now working in degrees...
+	math::Vector<2> vPlane = current_global_position - circle_centre;
 	//math::Vector<2> vPlane = get_local_planar_vector(circle_centre,current_global_position);
 	vPlane.normalize();
-	math::Vector<2> vP1 = vPlane * circleRadius;
 
-	//math::Vector<2> vP1 = vPlane * circleRadius/(static_cast<float>(CONSTANTS_RADIUS_OF_EARTH));
+	// Need to convert circle radius from meters to degrees.
+	float xyM[] = {0,0};
+	xyM[0] = vPlane.data[0] * circleRadius;
+	xyM[1] = vPlane.data[1] * circleRadius;
+
+	meterToLatLonScaling(xyM,current_global_position.data[0],current_global_position.data[1]);
+
+	math::Vector<2> vP1((float)xyM[0],(float)xyM[1]);	// This now has a magnitude in degrees.
 
 	//
 	// Calculate location of point 2.
@@ -1286,21 +1282,24 @@ float FixedwingPositionControl::navigate_circle2(const struct position_setpoint_
 	float phi = theta  - leadAngle;
 
 	// Vector from circle centre to point 2.
-	math::Vector<2> vP2((float)circleRadius*cosf(phi),(float)circleRadius*sinf(phi));
-	// Physical location of point 2,
+	float xyP2M[] = {(float)circleRadius*cosf(phi),(float)circleRadius*sinf(phi)}; // This is in meters.
+	meterToLatLonScaling(xyP2M,current_global_position.data[0],current_global_position.data[1]); // This is in degrees...
+
+	math::Vector<2> vP2(xyP2M[0],xyP2M[1]);
+
+	// Physical location of point 2, in degrees. Good.
 	math::Vector<2> point2 = circle_centre + vP2;
 
 	//
 	// Calculate roll command.
 	//
 
-	// Our current heading
+	// Our current heading. Still using local velocity vector for this. Don't know what else to do. It should work.
 	math::Vector<2> velocity((float)_local_pos.vx,(float)_local_pos.vy);
 	velocity.normalize();
 
 	// Vector from current location to point 2.
-	math::Vector<2> vP2_currentLocation = point2 - current_location;
-	//math::Vector<2> vP2_currentLocation = point2 - current_global_position;
+	math::Vector<2> vP2_currentLocation = point2 - current_global_position;
 	vP2_currentLocation.normalize();
 
 	// Calculate roll command. We use the angle between the flight path and the vector to point 2 for this.
@@ -1330,8 +1329,6 @@ float FixedwingPositionControl::navigate_circle2(const struct position_setpoint_
 		rollCommand = -rollMagnitudeLimit;
 	}
 
-
-
 	// Debug prints
 	//printf("circle2: rc: %0.3f rad: %0.3f P: %0.3f D: %0.3f \n",(double)rollCommand,(double)circleRadius,(double)P,(double)D);
 
@@ -1343,15 +1340,16 @@ float FixedwingPositionControl::navigate_circle2(const struct position_setpoint_
 }
 
 // James adds lat2meters or whatever
-void FixedwingPositionControl::latLonToMeterScaling(float (&xy)[2],float lat,float lon){
+void FixedwingPositionControl::meterToLatLonScaling(float (&xy)[2],float lat,float lon){
 
 	float degToMeters0 = 111.32f * 1000.0f;	// 1 degree is this many meters at the equator (longitude)
 											// In latitude, it is always this amount of meters...
 	// Do latitude
-	xy[0] = lat * degToMeters0;
+	xy[0] = xy[0] / degToMeters0;
 	// longitude
-	xy[1] = lon * (degToMeters0 * cosf(lat * 3.141592654f/180.0f));
+	xy[1] = xy[1] / (degToMeters0 * cosf(lat * 3.141592654f/180.0f));
 }
+
 
 // James copies the get local vector funcion from ecl to here
 math::Vector<2> FixedwingPositionControl::get_local_planar_vector(const math::Vector<2> &origin, const math::Vector<2> &target) const
