@@ -1351,7 +1351,7 @@ void FixedwingPositionControl::meterToLatLonScaling(float (&xy)[2],float lat,flo
 }
 
 
-// James copies the get local vector funcion from ecl to here
+// James copies the get local vector function from ecl to here
 math::Vector<2> FixedwingPositionControl::get_local_planar_vector(const math::Vector<2> &origin, const math::Vector<2> &target) const
 {
 	/* this is an approximation for small angles, proposed by [2] */
@@ -1614,7 +1614,7 @@ FixedwingPositionControl::control_position(const math::Vector<2> &current_positi
 		} else if (pos_sp_triplet.current.type == position_setpoint_s::SETPOINT_TYPE_LOITER) {
 
 			// James. I'm implementing our circling algorithm in place of the standard loiter...
-			// We kind of already did this back in the day. I'm just going to copy what I did last time for starters.
+			// We kind of already did this back in the day. It's now fixed up and seems to work.
 			_att_sp.roll_body = navigate_circle2(pos_sp_triplet);
 			_att_sp.yaw_body = _l1_control.nav_bearing();
 
@@ -2613,7 +2613,7 @@ void FixedwingPositionControl::tecs_update_pitch_throttle(float alt_sp, float v_
 		}
 
 		else {
-			_was_in_transition = false;
+			_was_in_transition = falseI'm just going to copy what I did last time for starters.;
 			_asp_after_transition = 0;
 		}
 	}

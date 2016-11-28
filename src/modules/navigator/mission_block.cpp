@@ -520,12 +520,14 @@ MissionBlock::mission_item_to_position_setpoint(const struct mission_item_s *ite
 	// Super Teddy assignments
 	case NAV_CMD_WAYPOINT_USER_1:
 
-		// State 1 is enroute to delivery location.
+		// State 1 is enroute to delivery location. I changed this to loiter too, so that it enters the circle nicely.
 		if(superTeddyNavObject.teddy_state == 1){
-			sp->type = position_setpoint_s::SETPOINT_TYPE_POSITION;
+			sp->type = position_setpoint_s::SETPOINT_TYPE_LOITER;
 			sp->lat = item->lat;
 			sp->lon = item->lon;
 			sp->alt = item->altitude_is_relative ? superTeddyNavObject.tetherLength + superTeddyNavObject.startDeliveryOffset + _navigator->get_home_position()->alt: item->altitude;
+			sp->loiter_radius = superTeddyNavObject.windMeasureLoiterRadius;
+			sp->loiter_direction = 1;
 		}
 
 		// State 2 is a loiter pattern while measuring the wind.

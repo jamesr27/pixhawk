@@ -43,7 +43,7 @@ bool superTeddy::isStateComplete()
 	// State 1: Simply need to reach the dropzone, same as a default pixhawk waypoint...
 	// We are only going to check position though. We have a distance, check it against a tolerance. Let's use 40 meters.
 	if (teddy_state == 1){
-		if (dist <= 60.f && dist >= 0.0f){
+		if (dist <= 80.f && dist >= 0.0f){
 			// Get time that wind measurement starts from.
 			measureStartTime = hrt_absolute_time();
 			return true;
