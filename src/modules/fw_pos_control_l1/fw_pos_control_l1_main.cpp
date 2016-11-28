@@ -2613,7 +2613,7 @@ void FixedwingPositionControl::tecs_update_pitch_throttle(float alt_sp, float v_
 		}
 
 		else {
-			_was_in_transition = falseI'm just going to copy what I did last time for starters.;
+			_was_in_transition = false;
 			_asp_after_transition = 0;
 		}
 	}
