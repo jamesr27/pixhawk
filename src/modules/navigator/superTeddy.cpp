@@ -214,6 +214,10 @@ void superTeddy::updateManouevreSetPoint(float (&offset)[2], float lat, float lo
 	offset[0] = returnValue[0];
 	offset[1] = returnValue[1];
 
+	// Hack for always zero
+	offset[0] = 0.0f;
+	offset[1] = 0.0f;
+
 	printf("%0.7f %0.7f\n",(double)returnValue[0],(double)returnValue[1]);
 }
 
@@ -263,6 +267,10 @@ void superTeddy::updateManouevreSetPointAscent(float (&offset)[2], float lat, fl
 	// Assign to offset?
 	offset[0] = returnValue[0];
 	offset[1] = returnValue[1];
+
+	// Hack for always zero
+	offset[0] = 0.0f;
+	offset[1] = 0.0f;
 
 	printf("%0.7f %0.7f\n",(double)returnValue[0],(double)returnValue[1]);
 }
