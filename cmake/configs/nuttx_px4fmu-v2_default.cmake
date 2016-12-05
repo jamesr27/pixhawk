@@ -7,7 +7,8 @@ set(config_uavcan_num_ifaces 2)
 set(config_module_list
     # Custom things
     modules/simulink
-
+    modules/heli_att_control
+    modules/heli_lib
 
 	#
 	# Board support modules

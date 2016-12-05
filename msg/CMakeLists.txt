@@ -53,16 +53,21 @@ set(msg_file_names
 	esc_report.msg
 	esc_status.msg
 	estimator_status.msg
+	feedback.msg
 	fence.msg
 	fence_vertex.msg
 	filtered_bottom_flow.msg
 	follow_target.msg
+	ftap_safety.msg
 	fw_pos_ctrl_status.msg
 	fw_virtual_attitude_setpoint.msg
 	fw_virtual_rates_setpoint.msg
 	geofence_result.msg
 	gps_dump.msg
 	gps_inject_data.msg
+	heli_flight_mode.msg
+	heli_mission_mode.msg
+	heli_state.msg
 	hil_sensor.msg
 	home_position.msg
 	input_rc.msg
@@ -98,7 +103,9 @@ set(msg_file_names
 	telemetry_status.msg
 	test_motor.msg
 	test_values.msg
+	tether_attach.msg
 	time_offset.msg
+	track_setpoint.msg
 	transponder_report.msg
 	uavcan_parameter_request.msg
 	uavcan_parameter_value.msg
@@ -107,6 +114,7 @@ set(msg_file_names
 	vehicle_command_ack.msg
 	vehicle_command.msg
 	vehicle_control_mode.msg
+	vehicle_custom_position_setpoint.msg
 	vehicle_force_setpoint.msg
 	vehicle_global_position.msg
 	vehicle_global_velocity_setpoint.msg
