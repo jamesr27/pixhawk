@@ -30,14 +30,13 @@
 
  }
 
-
-
+// Comment back in when you want to use it.
+ //static orb_advert_t _mavlink_fd = 0;
 
 //Constructor
  HelicopterCommandModel::HelicopterCommandModel() :
  _task_should_exit(false),
  _control_task(-1),
- _mavlink_fd(-1),
 
 
 	/** Initialize state */ 
@@ -481,7 +480,9 @@ HelicopterCommandModel::command_model(float dt)
 void
 HelicopterCommandModel::task_main() 
 {
-	_mavlink_fd = px4_open(MAVLINK_LOG_DEVICE, 0);
+	//_mavlink_fd = px4_open(MAVLINK_LOG_DEVICE, 0);
+
+
 
 	/* get an initial update for all sensor and status data */
 	parameters_update(true);

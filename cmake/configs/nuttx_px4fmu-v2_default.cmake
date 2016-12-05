@@ -9,6 +9,11 @@ set(config_module_list
     modules/simulink
     modules/heli_att_control
     modules/heli_lib
+    modules/heli_command_model
+    modules/heli_flight_mode_control
+    modules/heli_path_planner
+    modules/heli_state_machine
+    modules/heli_tracking_control
 
 	#
 	# Board support modules
@@ -87,7 +92,8 @@ set(config_module_list
 	#modules/uORB/uORB_tests
 	#systemcmds/tests
 
-	#
+	#/home/lockwing/gcc-arm-none-eabi-5_4-2016q2/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/bin/ld: region `flash' overflowed by 4408 bytes
+
 	# General system control
 	#
 	modules/commander
@@ -105,7 +111,7 @@ set(config_module_list
 	#modules/ekf_att_pos_estimator
 	modules/position_estimator_inav
 	modules/local_position_estimator
-	modules/ekf2
+	#modules/ekf2
 
 	#
 	# Vehicle Control

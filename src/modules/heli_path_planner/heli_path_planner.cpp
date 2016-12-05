@@ -29,11 +29,13 @@
 
  }
 
+ // Comment back in when you want to use it.
+ //static orb_advert_t _mavlink_fd = 0;
+
 //Constructor
  HelicopterPathPlanner::HelicopterPathPlanner() :
  _task_should_exit(false),
  _control_task(-1),
- _mavlink_fd(-1),
  _elevation_measured(0), 
  _elevation_target(0),
  _gamma_measured(0), 
@@ -162,7 +164,6 @@
 
  	// Calculate wrap offset.
  	// We need to reset to 0 if not in flight mode.
-
 	if((_gamma_measured - _gammaM_prev) > 1.5f * (float) M_PI) { //If the change is greater than 3pi/2
 		_wrap_offset += -2.0f * (float) M_PI;
 
@@ -387,7 +388,7 @@ HelicopterPathPlanner::task_main_trampoline(int argc, char *argv[])
 void
 HelicopterPathPlanner::task_main() 
 {
-	_mavlink_fd = px4_open(MAVLINK_LOG_DEVICE, 0);
+	//_mavlink_fd = px4_open(MAVLINK_LOG_DEVICE, 0);
 
 	/* get an initial update for all sensor and status data */
 	po->do_subscriptions();

@@ -33,7 +33,7 @@
 #include <systemlib/systemlib.h>
 #include <mathlib/mathlib.h>
 #include <lib/geo/geo.h>
-#include <mavlink/mavlink_log.h>
+#include <systemlib/mavlink_log.h>
 #include <platforms/px4_defines.h>
 #include <uORB/uORB.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>

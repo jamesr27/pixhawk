@@ -28,12 +28,14 @@
 
  }
 
+ // Comment back in when you want to use it.
+ //static orb_advert_t _mavlink_fd = 0;
+
 //Constructor
  HelicopterTrackingControl::HelicopterTrackingControl() :
  _task_should_exit(false),
  _isTracking(false),
  _control_task(-1),
- _mavlink_fd(-1),
  _wrap_offset(0),
  _param_counter(0),
 
@@ -343,7 +345,7 @@ HelicopterTrackingControl::tracking_control(float dt)
 void
 HelicopterTrackingControl::task_main() 
 {
-	_mavlink_fd = px4_open(MAVLINK_LOG_DEVICE, 0);
+	//_mavlink_fd = px4_open(MAVLINK_LOG_DEVICE, 0);
 
 	/* get an initial update for all sensor and status data */
 	parameters_update(true);

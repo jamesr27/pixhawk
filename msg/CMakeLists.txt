@@ -48,6 +48,7 @@ set(msg_file_names
 	debug_key_value.msg
 	differential_pressure.msg
 	distance_sensor.msg
+	edison.msg
 	ekf2_innovations.msg
 	ekf2_replay.msg
 	esc_report.msg
@@ -63,6 +64,7 @@ set(msg_file_names
 	fw_virtual_attitude_setpoint.msg
 	fw_virtual_rates_setpoint.msg
 	geofence_result.msg
+	ground_commands.msg
 	gps_dump.msg
 	gps_inject_data.msg
 	heli_flight_mode.msg

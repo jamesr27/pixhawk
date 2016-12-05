@@ -27,11 +27,13 @@
 
  }
 
+ // Comment back in when you want to use it.
+ //static orb_advert_t _mavlink_fd = 0;
+
 //Constructor
  HelicopterStateMachine::HelicopterStateMachine() :
  _task_should_exit(false),
  _control_task(-1),
- _mavlink_fd(-1),
  _distance_sub(-1),
  _edison_sub(-1),
  _heli_state_sub(-1),
@@ -311,7 +313,7 @@
  void
  HelicopterStateMachine::task_main() 
  {
- 	_mavlink_fd = px4_open(MAVLINK_LOG_DEVICE, 0);
+ 	//_mavlink_fd = px4_open(MAVLINK_LOG_DEVICE, 0);
 
 	/* get an initial update for all sensor and status data */
  	parameters_update();

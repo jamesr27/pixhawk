@@ -28,11 +28,13 @@ HelicopterFlightModeControl *g_control;
 }
 
 
+// Comment back in when you want to use it.
+//static orb_advert_t _mavlink_fd = 0;
+
 //Constructor
 HelicopterFlightModeControl::HelicopterFlightModeControl() :
 	_task_should_exit(false),
 	_control_task(-1),
-	_mavlink_fd(-1),
 
 	/* publications */
 	_heli_flight_mode_pub(nullptr)
@@ -137,7 +139,7 @@ HelicopterFlightModeControl::flight_mode(float dt)
 void
 HelicopterFlightModeControl::task_main() 
 {
-	_mavlink_fd = px4_open(MAVLINK_LOG_DEVICE, 0);
+	//_mavlink_fd = px4_open(MAVLINK_LOG_DEVICE, 0);
 
 	/* get an initial update for all sensor and status data */
 	po->do_subscriptions();

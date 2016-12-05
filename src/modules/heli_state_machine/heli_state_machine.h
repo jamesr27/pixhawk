@@ -33,7 +33,7 @@
 #include <systemlib/systemlib.h>
 #include <mathlib/mathlib.h>
 #include <lib/geo/geo.h>
-#include <mavlink/mavlink_log.h>
+#include <systemlib/mavlink_log.h>
 #include <platforms/px4_defines.h>
 #include <uORB/uORB.h>
 #include <uORB/topics/ground_commands.h>
@@ -100,7 +100,6 @@
 
 		bool 					_task_should_exit;
 		int						_control_task;
-		int 					_mavlink_fd;
 
 		heli_state_s 			_heli_state;
 		ground_commands_s 		_ground_commands;

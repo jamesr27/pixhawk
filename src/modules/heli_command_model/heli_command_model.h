@@ -25,7 +25,7 @@
 #include <systemlib/systemlib.h>
 #include <mathlib/mathlib.h>
 #include <lib/geo/geo.h>
-#include <mavlink/mavlink_log.h>
+#include <systemlib/mavlink_log.h>
 #include <platforms/px4_defines.h>
 
 #include <heli_lib/rotations/rotations.h>
@@ -138,7 +138,6 @@ private:
 
 	bool	_task_should_exit;		/**< if true, task should exit */
 	int		_control_task;			/**< task handle for task */
-	int		_mavlink_fd;			/**< mavlink fd */
 
 	bool 	_command_mode;
 	bool 	_alt_mode;

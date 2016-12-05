@@ -46,7 +46,6 @@
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/test_values.h>
 #include <uORB/topics/feedback.h>
-#include <uORB/topics/mavlink_log.h>
 
 // James changes to systemlib
 #include <systemlib/mavlink_log.h>
