@@ -54,7 +54,7 @@ public:
 	// Other stuff.
 	float wind_vx = 0.0f;				// Wind direction in direction of flow. None of this weather definition crap.
 	float wind_vy = 0.0f;
-	float windMeasureTime = 10.0f;	// Estimate wind over 45 seconds.
+	float windMeasureTime = 30.0f;	// Estimate wind over 45 seconds.
 	float windx = 0.0f;			// Position in meters away from the drop target that we want to sample the wind at.
 	float windy = 0.0f;
 	float windRunning_vx = 0;

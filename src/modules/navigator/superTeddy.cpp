@@ -113,8 +113,8 @@ void superTeddy::advanceState(int& input){
 }
 
 void superTeddy::assignWind(float vx, float vy){
-	windRunning_vx = vx;
-	windRunning_vy = vy;
+	windRunning_vx = -vx;	//James puts the negatives in here.
+	windRunning_vy = -vy;
 	//printf("Teddy wind %0.3f %0.3f\n",(double)windRunning_vx,(double)windRunning_vy);
 }
 
@@ -155,7 +155,7 @@ void superTeddy::updateManouevreSetPoint(float (&offset)[2], float lat, float lo
 	float manTime = (float)(timeNow - teddyStartTime)/1000000.0f; //Time we are into the manoevure in seconds.
 	float returnValue[]={0,0};	// [m], x and y for now.
 
-	// Some hacking to the below equations has occulatLonrred. Mostly for testing pruposes.
+	// Some hacking to the below equations has occurred. Mostly for testing pruposes.
 
 	// We have 3 phases (currently).
 	//	1. We don't move the setpoint for the first 20 seconds.
@@ -169,7 +169,7 @@ void superTeddy::updateManouevreSetPoint(float (&offset)[2], float lat, float lo
 	manTime = manTime - 20.0f;
 	// 1.
 	if (manTime <= 20.0f){
-		returnValue[0] = man_xm * (manTime) + 3*man_xc;
+		returnValue[0] = man_xm * (manTime) + 3*man_xc;		// Why did i put these 3's in here? I don't know. Now they are out.
 		returnValue[1] = man_ym * (manTime) + 3*man_yc;
 		//returnValue[0] = man_xc;
 		//returnValue[1] = man_yc;
@@ -215,8 +215,8 @@ void superTeddy::updateManouevreSetPoint(float (&offset)[2], float lat, float lo
 	offset[1] = returnValue[1];
 
 	// Hack for always zero
-	offset[0] = 0.0f;
-	offset[1] = 0.0f;
+	//offset[0] = 0.0f;
+	//offset[1] = 0.0f;
 
 	printf("%0.7f %0.7f\n",(double)returnValue[0],(double)returnValue[1]);
 }
@@ -229,7 +229,7 @@ void superTeddy::updateManouevreSetPointAscent(float (&offset)[2], float lat, fl
 	float returnValue[]={0,0};	// [m], x and y for now.
 
 	//	We'll only have one phase here.
-	//		Ascend along the wind speed path until we are back at teterlength + altitude offset.
+	//		Ascend along the wind speed path until we are back at tetherlength + altitude offset.
 	//		Once we have gone through this procedure we mark the entire waypoint as complete.
 
 	//
@@ -269,8 +269,8 @@ void superTeddy::updateManouevreSetPointAscent(float (&offset)[2], float lat, fl
 	offset[1] = returnValue[1];
 
 	// Hack for always zero
-	offset[0] = 0.0f;
-	offset[1] = 0.0f;
+	//offset[0] = 0.0f;
+	//offset[1] = 0.0f;
 
 	printf("%0.7f %0.7f\n",(double)returnValue[0],(double)returnValue[1]);
 }
