@@ -43,6 +43,7 @@
 #include <heli_lib/digital_filter/digital_filter.h>
 #include <heli_lib/c_signal/c_signal.h>
 #include <heli_lib/poller/poller.h>
+#include <heli_lib/mathsFunctions/mathsFunctions.h>
 
 extern "C" __EXPORT int heli_tracking_control_main(int argc, char *argv[]);
 
@@ -133,7 +134,6 @@ private:
 	bool 	_isTracking;
 	int 	_control_task;
 	int		_mavlink_fd;			/**< mavlink fd */
-	float 	_wrap_offset;
 	int 	_param_counter;
 
 	math::Vector<4> _v_total;

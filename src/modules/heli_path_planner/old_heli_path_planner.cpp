@@ -14,10 +14,6 @@
  *  Maintains the helicopter nose towards the middle of the circle such that
  *  the tether never catches. 
  * 
- *	James modifies the approach wrt yaw here. Every yaw command is wrapped to +-pi now, and
- *	we use vector algebra to calculate the command. This way we will never have random spinning again. I'm over that
- *	in a big way. I don't see that this will cause any issues.
- *
  *
  */
 #include "heli_path_planner.h"
@@ -166,28 +162,43 @@
  		rate_transition(_local_pos_sp.y, _target_position(1), dt, true);
  	}
 
+ 	// Calculate wrap offset.
+ 	// We need to reset to 0 if not in flight mode.
+	if((_gamma_measured - _gammaM_prev) > 1.5f * (float) M_PI) { //If the change is greater than 3pi/2
+		_wrap_offset += -2.0f * (float) M_PI;
+
+	} else if((_gamma_measured - _gammaM_prev) < -1.5f * (float) M_PI) {//If less than -3pi/2
+		_wrap_offset += +2.0f * (float) M_PI;
+	}
+
+	// Reset to zero here.
+	if(!po->_flight_mode.isTracking) {
+		_wrap_offset = 0.0f;
+
+	}
 
 
- 	// Rid of the rate transitions on gamma target in here (will put elsewhere).
- 	// Wrap the yaw setpoint to +- pi again.
- 	if ((_gamma_target - gamma_measured) < 0.1f)
- 	{
- 		_local_pos_sp.yaw = wrapPi(_gamma_target + (float)M_PI);
- 	}
- 	else {
- 		_local_pos_sp.yaw = wrapPi(_gamma_measured + (float)M_PI);
- 	}
+	float gamma_measured_unwrapped = _gamma_measured + _wrap_offset;
 
+	if ((_gamma_target - gamma_measured_unwrapped) < 0.1f)
+	{
+		if(_gamma_direction) {
+			rate_transition(_local_pos_sp.yaw, _gamma_target - (float) M_PI, dt, false);
+		} else {
+			rate_transition(_local_pos_sp.yaw, _gamma_target + (float) M_PI, dt, false);
+		}
+	}
+	else {
+		if(_gamma_direction) {
+			rate_transition(_local_pos_sp.yaw, gamma_measured_unwrapped - (float) M_PI, dt, false);
+		} else {
+			rate_transition(_local_pos_sp.yaw, gamma_measured_unwrapped + (float) M_PI, dt, false);
 
-//	if ((_gamma_target - gamma_measured) < 0.1f)
-//	{
-//		rate_transition(_local_pos_sp.yaw, _gamma_target + (float) M_PI, dt, false);
-//	}
-//	else {
-//		rate_transition(_local_pos_sp.yaw, _gamma_measured + (float) M_PI, dt, false);
-//	}
+		}
+	}
 
 	_gammaM_prev = _gamma_measured;
+
 
 	//printf("gt: %.3f gm: %.3f gtu: %.3f\n",(double)_gamma_target,(double)_gamma_measured,(double)gamma_measured_unwrapped);
  }
@@ -198,9 +209,6 @@
 	//Get the relative X, Y, Z( altitude)
  	math::Vector<3> relPos(po->_local_pos.x - _target(0), po->_local_pos.y - _target(1), -po->_local_pos.z - _target(2));
  	_gamma_measured = atan2f(relPos(1),relPos(0));
-
- 	// Wrap, though pointless as it comes from atan2.
- 	_gamma_measured = wrapPi(_gamma_measured);
 
 	//Rotate it into the plane 
  	math::Vector<2> planeRelPos(relPos(0),relPos(1));
@@ -275,8 +283,14 @@ HelicopterPathPlanner::mode_logic() {
 		_initial_x = po->_local_pos.x;
 		_initial_y = po->_local_pos.y;
 
-		// Gamma target is measured gamma + pi
-		_gamma_target = po->_v_att.yaw + (float) M_PI;
+		if (po->_v_att.yaw <= 0){
+			_gamma_target = po->_v_att.yaw + (float) M_PI;
+			_gamma_direction = true;
+		}
+		else{
+			_gamma_target = po->_v_att.yaw - (float) M_PI;
+			_gamma_direction = false;
+		}
 
 		_mission_mode.missionMode = heli_mission_mode_s::FTAP_ON_GROUND;
 
@@ -289,7 +303,15 @@ HelicopterPathPlanner::mode_logic() {
 		{
 			_initial_x = po->_local_pos.x;
 			_initial_y = po->_local_pos.y;
-			_gamma_target = po->_v_att.yaw + (float) M_PI;
+			if (po->_v_att.yaw <= 0){
+				_gamma_target = po->_v_att.yaw + (float) M_PI;
+				_gamma_direction = true;
+			}
+			else{
+				_gamma_target = po->_v_att.yaw - (float) M_PI;
+				_gamma_direction = false;
+			}
+			//printf("Mission initialise...\n");
 
 		} 
 
@@ -306,7 +328,7 @@ HelicopterPathPlanner::mode_logic() {
 
 			if(_mission_mode.missionMode == heli_mission_mode_s::FTAP_TO_AND_LAND && _missionModePrev == heli_mission_mode_s::FTAP_NORMAL_FLIGHT) 
 			{
-				_gamma_target = _gamma_target;
+				_gamma_target = _gamma_target; // What do we want here? 
 				_elevation_target = _params.take_off_elevation;
 				//printf("Land mode\n");
 //				usleep(10000);
@@ -325,14 +347,17 @@ HelicopterPathPlanner::mode_logic() {
 
 	}
 
-	// Wrap _gamma_target to +-pi
-	_gamma_target = wrapPi(_gamma_target);
+	// Calculate the target
 
-	// Calculate the target point location.
 	math::Vector<3> offset;
-	offset(0) = inPlaneOffset*cosf(_gamma_target + (float) M_PI);
-	offset(0) = inPlaneOffset*sinf(_gamma_target + (float) M_PI);
 
+	if(_gamma_direction) {
+		offset(0) = inPlaneOffset*cosf(_gamma_target -(float) M_PI);
+		offset(1) = inPlaneOffset*sinf(_gamma_target- (float) M_PI);
+	} else {
+		offset(0) = inPlaneOffset*cosf(_gamma_target + (float) M_PI);
+		offset(0) = inPlaneOffset*sinf(_gamma_target + (float) M_PI);
+	}
 
 	offset(2) = lead_z;
 

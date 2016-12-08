@@ -32,6 +32,7 @@
 #include <heli_lib/digital_filter/digital_filter.h>
 #include <heli_lib/c_signal/c_signal.h>
 #include <heli_lib/poller/poller.h>
+#include <heli_lib/mathsFunctions/mathsFunctions.h>
 
 extern "C" __EXPORT int heli_path_planner_main(int argc, char *argv[]);
 

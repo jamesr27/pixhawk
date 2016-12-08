@@ -10,7 +10,8 @@ px4_add_module(
 		rotations/rotations.cpp 
 		digital_filter/digital_filter.cpp
 		c_signal/c_signal.cpp 
-		poller/poller.cpp 
+		poller/poller.cpp
+		mathsFunctions/mathsFunctions.cpp
 	DEPENDS
 		platforms__common
 	)

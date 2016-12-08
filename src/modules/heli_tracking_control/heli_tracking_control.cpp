@@ -12,6 +12,8 @@
  *
  * Tracking control as described in Autonomous CLAWS paper. First steps in the outer loops
  * of the model following controller. 
+ *
+ * James modifies the yaw command
  */
 
 
@@ -36,7 +38,6 @@
  _task_should_exit(false),
  _isTracking(false),
  _control_task(-1),
- _wrap_offset(0),
  _param_counter(0),
 
 	/* publications */
@@ -299,25 +300,6 @@ HelicopterTrackingControl::get_path_signals()
 		_path_inputs[1].bump_current(po->_local_pos.x);
 		_path_inputs[2].bump_current(po->_v_att.yaw);
 		_path_inputs[3].bump_current(0);
-
-		// Not sure if the wrapping will get cocked up with my new scheme of toggling tracking during flight.
-		// Causes issues when it is in here. Move it to if statement below.
-		//_wrap_offset = 0.0f;
-
-		// for(int i = 0; i < NUM_TRACKS; i++) {
-		// 	_filtered_path[i].zero();
-		// 	_filtered_pos_err[i].zero();
-		// 	_pos_err_signal[i].zero();
-		// 	_pos_err.zero();
-		// 	_all_outputs[i].zero();
-		// 	_v_total.zero();
-		// }
-	
-	}
-	// Set the wrap offset to zero if we are not in a mission.
-	if (po->_flight_mode.isMission == false)
-	{
-		_wrap_offset = 0.0f;
 	}
 }
 
