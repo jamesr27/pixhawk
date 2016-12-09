@@ -13,7 +13,7 @@
  * Tracking control as described in Autonomous CLAWS paper. First steps in the outer loops
  * of the model following controller. 
  *
- * James modifies the yaw command
+ * James modifies the yaw command.
  */
 
 
@@ -201,19 +201,49 @@
  }
 
 
- void
- HelicopterTrackingControl::wrap_yaw()
- {
+float
+HelicopterTrackingControl::yawCommandPreCalc()
+{
+	// We receive a +- pi wrapped path input. Here we compare this with a wrapped yaw estimate,
+	// and give out a + for yaw right, and -ve for yaw left command in radians. It will always try to go the shortest route
+	// to the target yaw attitude. The easiest way to make sure this can never be wrong is to use vector algebra to calculate the command.
+	// We essentially move the yaw error calculation infront of everything else. This is to remove winding up and down
+	// yaw behaviour. We never want it to do this. Every yaw input/command is wrapped to +-pi now.
 
-	if((po->_v_att.yaw - _yaw_prev) > 1.5f * (float) M_PI) { //If the change is greater than 3pi/2
-		_wrap_offset += 2.0f * (float) M_PI;
+	// Create and normalise the yaw command vector
+	math::Vector<3> yawCVector;
+	yawCVector(0) = cosf(_path_inputs[2].current());
+	yawCVector(1) = sinf(_path_inputs[2].current());
+	yawCVector(2) = 0;
+	yawCVector.normalize();
 
-	} else if((po->_v_att.yaw - _yaw_prev) < -1.5f * (float) M_PI) {//If less utthan -3pi/2
-		_wrap_offset += -2.0f * (float) M_PI;
+	// Create and normalise the yaw estimate vector
+	math::Vector<3> yawEVector;
+	yawEVector(0) = cosf(po->_v_att.yaw);
+	yawEVector(1) = sinf(po->_v_att.yaw);
+	yawEVector(2) = 0;
+	yawEVector.normalize();
+
+	// Take dot product of command with estimate.
+	float dotProd = yawCVector(0)*yawEVector(0) + yawCVector(1)*yawEVector(1) + yawCVector(2)*yawEVector(2);
+	// Calculate angle between the two vectors from the dot product.
+	float dotAngle = acosf(dotProd);  // I assume that the two vectors are normalised prior to this.
+
+	// Calculate the cross product. This built into math.h.
+	math::Vector<3> crossProdV = yawCVector%yawEVector;
+
+	// Now if else check on the sense of the command output.
+	float commandErrorOut = 0;
+	if (crossProdV(2) >= 0)
+	{
+		commandErrorOut = - dotAngle;
+	}
+	else if (crossProdV(2) < 0)
+	{
+		commandErrorOut = dotAngle;
 	}
 
-//	printf("AO: %.3f %.3f\n",(double)_filtered_path[2].current(),(double)po->_v_att.yaw);
-	_yaw_prev = po->_v_att.yaw;
+	return commandErrorOut;
 }
 
 void 
@@ -263,20 +293,22 @@ HelicopterTrackingControl::position_feedback(float dt)
 	positions(2) = po->_v_att.yaw;
 	positions(3) = -po->_local_pos.z;
 
-	wrap_yaw();
-
 	for(int i = 0; i < NUM_TRACKS; i++) 
 	{
-		if(i == 2) {
-			_pos_err_signal[i].bump_current(_filtered_path[i].current() + _wrap_offset - positions(i));
-		} else {
-		_pos_err_signal[i].bump_current(_filtered_path[i].current() - positions(i));
-
+		// For yaw the input track is already an "error". The rest leave as it was.
+		if (i == 2)
+		{
+			_pos_err_signal[i].bump_current(_filtered_path[i].current());
+			_filtered_pos_err[i].bump_current(filter_signal(0.0, 1.0f, 0.0f, 0.0f, _params.pos_p(i), _params.pos_i(i), _pos_err_signal[i], _filtered_pos_err[i], dt));
+			_pos_err(i) = _filtered_pos_err[i].current();
 		}
-		_filtered_pos_err[i].bump_current(filter_signal(0.0, 1.0f, 0.0f, 0.0f, _params.pos_p(i), _params.pos_i(i), _pos_err_signal[i], _filtered_pos_err[i], dt));
-		_pos_err(i) = _filtered_pos_err[i].current();
+		else
+		{
+			_pos_err_signal[i].bump_current(_filtered_path[i].current() - positions(i));
+			_filtered_pos_err[i].bump_current(filter_signal(0.0, 1.0f, 0.0f, 0.0f, _params.pos_p(i), _params.pos_i(i), _pos_err_signal[i], _filtered_pos_err[i], dt));
+			_pos_err(i) = _filtered_pos_err[i].current();
+		}
 	}
-
 }
 
 
@@ -289,7 +321,9 @@ HelicopterTrackingControl::get_path_signals()
 	if(po->_flight_mode.isTracking) {
 		 _path_inputs[0].bump_current(po->_local_pos_sp.y);
 		 _path_inputs[1].bump_current(po->_local_pos_sp.x);
-		 _path_inputs[2].bump_current(po->_local_pos_sp.yaw);
+		 _path_inputs[2].bump_current(yawCommandPreCalc());	// We get the yaw path input from this function now.
+		 	 	 	 	 	 	 	 	 	 	 	 	 	// This is now an "error". So we change the position feedback bit on yaw too.
+		 //_path_inputs[2].bump_current(po->_local_pos_sp.yaw);
 		// _path_inputs[0].bump_current(0);
 		// _path_inputs[1].bump_current(0);
 		// _path_inputs[2].bump_current(0);
@@ -307,14 +341,13 @@ void
 HelicopterTrackingControl::tracking_control(float dt)
 {
 
-	//The blocks in order...
 	position_prefilter(dt);
 
 	velocity_feedback(dt);
 
 	position_feedback(dt);
 	
-	// The final gains were not in here. They are in the command model.
+	// The final gains are in the command model.
 	// 0 is vy and 1 is vx
 	
 	for(int i = 0; i < NUM_TRACKS; i++) {
@@ -382,6 +415,7 @@ HelicopterTrackingControl::task_main()
 		dt = 0.004f;
 		// Sim
 		// dt = 0.02;
+
 
 		//Depending on where the signal comes from this will change.
 		get_path_signals();

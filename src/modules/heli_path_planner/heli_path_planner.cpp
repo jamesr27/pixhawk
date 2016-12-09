@@ -170,13 +170,15 @@
 
  	// Rid of the rate transitions on gamma target in here (will put elsewhere).
  	// Wrap the yaw setpoint to +- pi again.
- 	if ((_gamma_target - gamma_measured) < 0.1f)
+ 	if ((_gamma_target - _gamma_measured) < 0.1f)
  	{
  		_local_pos_sp.yaw = wrapPi(_gamma_target + (float)M_PI);
  	}
  	else {
  		_local_pos_sp.yaw = wrapPi(_gamma_measured + (float)M_PI);
  	}
+
+
 
 
 //	if ((_gamma_target - gamma_measured) < 0.1f)

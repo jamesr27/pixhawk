@@ -16,11 +16,20 @@
 
 #include "mathsFunctions.h"
 
+
+
 float wrapPi(float angle)
 {
 	float angleOut;
-	angleOut = (angle - M_PI)%(2 * M_PI) - M_PI;
-	return angleOut;
-} 
+	angleOut = (float)fmod(((double)angle + M_PI),(2.0 * M_PI));
 
+	if (angleOut < 0)
+	{
+		angleOut += 2.0f * (float)M_PI;
+	}
+
+	angleOut = angleOut - (float)M_PI;
+
+	return angleOut;
+}
 

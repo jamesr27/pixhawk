@@ -13,8 +13,6 @@
  * 
  */
 
-#ifndef HEADING_KINEMATICS_H_
-#define HEADING_KINEMATICS_H_
 
 
 #include <float.h>
@@ -24,10 +22,7 @@
 #include <mathlib/mathlib.h>
 
 __BEGIN_DECLS
-
-extern "C" __EXPORT float wrapPi(float angle);
-
+float wrapPi(float angle);
 
 __END_DECLS
 
-#endif /* HEADING_KINEMATICS_H_ */

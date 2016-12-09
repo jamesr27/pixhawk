@@ -77,6 +77,8 @@ public:
 
 	void 		wrap_yaw();
 
+	float		yawCommandPreCalc();
+
 
 	void 		position_feedback(float dt);
 
