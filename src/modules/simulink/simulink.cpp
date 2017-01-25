@@ -51,7 +51,7 @@
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/test_values.h>
-//#include <uORB/topics/track_setpoint.h>
+#include <uORB/topics/track_setpoint.h>
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/differential_pressure.h>
 #include <uORB/topics/actuator_controls.h>
@@ -79,7 +79,7 @@ static int _test_sub = 0;
 static int _rc_sub = 0;
 static int _sensors_sub = 0;
 static int _pos_sub = 0;
-//static int _track_sub = 0;
+static int _track_sub = 0;
 static int _manual_sub = 0;
 static int _diff_pres_sub = 0;
 static int _act_sub = 0;
@@ -145,8 +145,8 @@ void write_hil_controls(Autopilot_Interface &api)
 	struct vehicle_local_position_s _pos;
 	memset(&_pos, 0, sizeof(_pos));
 
-//	struct track_setpoint_s _track;
-//	memset(&_track, 0, sizeof(_track));
+	struct track_setpoint_s _track;
+	memset(&_track, 0, sizeof(_track));
 
 	struct manual_control_setpoint_s _manual;
 	memset(&_manual, 0, sizeof(_manual));
@@ -167,7 +167,7 @@ void write_hil_controls(Autopilot_Interface &api)
 
 			orb_copy(ORB_ID(actuator_controls_0), _act_sub, &_actuators);
 
-			//orb_copy(ORB_ID(track_setpoint), _track_sub, &_track);
+			orb_copy(ORB_ID(track_setpoint), _track_sub, &_track);
 			
 			orb_copy(ORB_ID(vehicle_local_position), _pos_sub, &_pos);
 
@@ -208,11 +208,11 @@ void write_hil_controls(Autopilot_Interface &api)
 			sim.signal_1 = _rc_chan.channels[4];
 			sim.signal_2 = _rc_chan.channels[5];
 			sim.signal_3 = _rc_chan.channels[6];
-			sim.probe_1 = _actuators.control[0];
-			sim.probe_2 = _actuators.control[1];
-			sim.probe_3 = _actuators.control[2];
-			sim.probe_4 = _actuators.control[3];
-			sim.probe_5 = 0;
+			sim.probe_1 = _test_val.value1;     //_actuators.control[0];
+			sim.probe_2 = _test_val.value2; 	//_actuators.control[1];
+			sim.probe_3 = _test_val.value3; 	//_actuators.control[2];
+			sim.probe_4 = _test_val.value4; 	//_actuators.control[3];
+			sim.probe_5 = _track.vr;
 			sim.probe_6 = 0;
 			api.write_sim(sim);
 	 		usleep(100);
@@ -224,7 +224,10 @@ void write_hil_controls(Autopilot_Interface &api)
 
 void assign_sensors(mavlink_hil_sensor_t sensor_message, uint64_t timestamp) 
 {
-	// James hack
+	// James: The changes (comments) to the assignments below were all necessary when moving
+	// to the latest pixhawk firmware. Time stamping in Mavlink messages is handled differently now,
+	// as is the content of the sensors message. It was lots of fun to sort out.
+
 	timestamp = hrt_absolute_time();
 	//mavlink_log_info(_mavlink_fd, "We're in here\n");
 	/* sensor combined */
@@ -523,7 +526,7 @@ simulink_thread_main(int argc, char *argv[]){
 	_test_sub =  orb_subscribe(ORB_ID(test_values));
 	_sensors_sub = orb_subscribe(ORB_ID(sensor_combined));
 	_pos_sub  = orb_subscribe(ORB_ID(vehicle_local_position));
-//	_track_sub = orb_subscribe(ORB_ID(track_setpoint));
+	_track_sub = orb_subscribe(ORB_ID(track_setpoint));
 	_manual_sub = orb_subscribe(ORB_ID(manual_control_setpoint));
 	_diff_pres_sub = orb_subscribe(ORB_ID(differential_pressure));
 	write_hil_controls(autopilot_interface);

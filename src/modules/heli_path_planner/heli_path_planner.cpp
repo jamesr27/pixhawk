@@ -403,9 +403,9 @@ HelicopterPathPlanner::task_main()
 		}
 
 		// RL
-		float dt = 0.004;
+		//float dt = 0.004;
 		// Sim
-		// float dt = 0.02;
+		float dt = 0.02;
 
 		_isMissionPrev = po->_flight_mode.isMission;
 

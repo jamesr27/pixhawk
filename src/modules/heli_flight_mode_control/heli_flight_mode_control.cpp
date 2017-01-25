@@ -80,7 +80,7 @@ void
 HelicopterFlightModeControl::flight_mode(float dt)
 {
 	//Still need to figure out behaviour on a switch here.
-	// James gets rid of altitude hold switching. We don't need it.
+	// James gets rid of altitude hold switching. We don't need it for now.
 	// Tracking moved to channel 5
 	// Mission on 8
 	// Throttle on 9
@@ -174,9 +174,9 @@ HelicopterFlightModeControl::task_main()
 		}
 
 		// RL
-		float dt = 0.004;
+		//float dt = 0.004;
 		// Sim
-		// float dt = 0.02f;
+		float dt = 0.02f;
 
 		//Run the command model based on the initialized state. 
 		po->poll_all();

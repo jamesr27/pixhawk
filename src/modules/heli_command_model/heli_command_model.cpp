@@ -459,7 +459,7 @@ HelicopterCommandModel::command_model(float dt)
 						2.0f * _params.cyclic_nfv(1) * _params.cyclic_drv(1), powf(_params.cyclic_nfv(1), 2.0f)); 
 	}
 
-	// What it this? James takes it out.
+
 	if(_isInitial && po->_armed.armed) {
 		_all_outputs[2][2].modify_history(0, po->_v_att.yaw);
 		_all_outputs[2][2].modify_history(1, po->_v_att.yaw);
@@ -532,10 +532,11 @@ HelicopterCommandModel::task_main()
 			dt = 0.02f;
 		}
 
+		// We do everything at 50 hz now.
 		// RL
-		dt = 0.004;
+		//dt = 0.004;
 		// Sim
-		// dt = 0.02;
+		dt = 0.02;
 
 		//Run the command model based on the initialized state. 
 		command_model(dt);

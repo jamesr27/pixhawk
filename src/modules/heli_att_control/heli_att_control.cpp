@@ -497,9 +497,9 @@ HelicopterAttitudeControl::task_main()
 			}
 
 			// RL
-			dt = 0.004;
+			//dt = 0.004;
 			//Sim
-			// dt = 0.02;
+			dt = 0.02;
 
 			/* Check the system status and get the necessary data.*/
 			get_state();

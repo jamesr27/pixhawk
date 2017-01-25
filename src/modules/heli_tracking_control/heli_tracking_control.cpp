@@ -208,7 +208,7 @@ HelicopterTrackingControl::yawCommandPreCalc()
 	// and give out a + for yaw right, and -ve for yaw left command in radians. It will always try to go the shortest route
 	// to the target yaw attitude. The easiest way to make sure this can never be wrong is to use vector algebra to calculate the command.
 	// We essentially move the yaw error calculation infront of everything else. This is to remove winding up and down
-	// yaw behaviour. We never want it to do this. Every yaw input/command is wrapped to +-pi now.
+	// yaw behaviour. We never want it to do this.
 
 	// Create and normalise the yaw command vector
 	math::Vector<3> yawCVector;
@@ -229,7 +229,7 @@ HelicopterTrackingControl::yawCommandPreCalc()
 	// Calculate angle between the two vectors from the dot product.
 	float dotAngle = acosf(dotProd);  // I assume that the two vectors are normalised prior to this.
 
-	// Calculate the cross product. This built into math.h.
+	// Calculate the cross product. This is built into math.h.
 	math::Vector<3> crossProdV = yawCVector%yawEVector;
 
 	// Now if else check on the sense of the command output.
@@ -277,7 +277,6 @@ HelicopterTrackingControl::velocity_feedback(float dt)
 		command_v(i) = derivative_signal(1, _filtered_path[i], dt); //1 is the scale on the derivative
 	} 
 
-//	command_v.print();
 
 
 	_v_total = _params.v_gain.emult(command_v - measured_v) + command_v;
@@ -412,9 +411,9 @@ HelicopterTrackingControl::task_main()
 		}
 
 		// RL
-		dt = 0.004f;
+		//dt = 0.004f;
 		// Sim
-		// dt = 0.02;
+		dt = 0.02;
 
 
 		//Depending on where the signal comes from this will change.
